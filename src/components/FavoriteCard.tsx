@@ -1,46 +1,55 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Heart, MapPin, Calendar, Euro, MessageSquare, StickyNote, Edit3 } from 'lucide-react'
-import { Seeker } from '@/features/seekers/types'
-import { formatBudget, formatDate, cn } from '@/lib/utils'
-import { useFavoritesStore } from '@/features/favorites/store'
-import ContactDialog from './ContactDialog'
+import { useFavoritesStore } from "@/features/favorites/store";
+import { Seeker } from "@/features/seekers/types";
+import { cn, formatBudget, formatDate } from "@/lib/utils";
+import {
+  Calendar,
+  Edit3,
+  Euro,
+  Heart,
+  MapPin,
+  MessageSquare,
+  StickyNote,
+} from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import ContactDialog from "./ContactDialog";
 
 interface FavoriteCardProps {
-  seeker: Seeker
+  seeker: Seeker;
 }
 
 export default function FavoriteCard({ seeker }: FavoriteCardProps) {
-  const { favorites, toggleFavorite, updateNote, getNote } = useFavoritesStore()
-  const [imageError, setImageError] = useState(false)
-  const [showContactDialog, setShowContactDialog] = useState(false)
-  const [showNoteEdit, setShowNoteEdit] = useState(false)
-  const [noteText, setNoteText] = useState(getNote(seeker.id))
-  const isFavorited = favorites.includes(seeker.id)
+  const { favorites, toggleFavorite, updateNote, getNote } =
+    useFavoritesStore();
+  const [imageError, setImageError] = useState(false);
+  const [showContactDialog, setShowContactDialog] = useState(false);
+  const [showNoteEdit, setShowNoteEdit] = useState(false);
+  const [noteText, setNoteText] = useState(getNote(seeker.id));
+  const isFavorited = favorites.includes(seeker.id);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    toggleFavorite(seeker.id)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFavorite(seeker.id);
+  };
 
   const handleContactClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setShowContactDialog(true)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    setShowContactDialog(true);
+  };
 
   const handleSaveNote = () => {
-    updateNote(seeker.id, noteText)
-    setShowNoteEdit(false)
-  }
+    updateNote(seeker.id, noteText);
+    setShowNoteEdit(false);
+  };
 
   const handleCancelNote = () => {
-    setNoteText(getNote(seeker.id))
-    setShowNoteEdit(false)
-  }
+    setNoteText(getNote(seeker.id));
+    setShowNoteEdit(false);
+  };
 
-  const currentNote = getNote(seeker.id)
+  const currentNote = getNote(seeker.id);
 
   return (
     <>
@@ -62,17 +71,17 @@ export default function FavoriteCard({ seeker }: FavoriteCardProps) {
               </div>
             </div>
           )}
-          
+
           <button
             onClick={handleFavoriteClick}
             className={cn(
               "absolute top-3 right-3 p-2 rounded-full shadow-sm transition-colors",
-              isFavorited 
-                ? "bg-red-500 text-white hover:bg-red-600" 
+              isFavorited
+                ? "bg-red-500 text-white hover:bg-red-600"
                 : "bg-white text-gray-600 hover:text-red-500"
             )}
           >
-            <Heart size={18} fill={isFavorited ? 'currentColor' : 'none'} />
+            <Heart size={18} fill={isFavorited ? "currentColor" : "none"} />
           </button>
         </div>
 
@@ -88,16 +97,16 @@ export default function FavoriteCard({ seeker }: FavoriteCardProps) {
                 {formatBudget(seeker.budgetMin, seeker.budgetMax)}
               </div>
             )}
-            
+
             {seeker.locations.length > 0 && (
               <div className="flex items-start text-sm text-gray-600">
                 <MapPin size={14} className="mr-2 mt-0.5 flex-shrink-0" />
                 <span className="line-clamp-1">
-                  {seeker.locations.join(', ')}
+                  {seeker.locations.join(", ")}
                 </span>
               </div>
             )}
-            
+
             {seeker.moveInFrom && (
               <div className="flex items-center text-sm text-gray-600">
                 <Calendar size={14} className="mr-2" />
@@ -144,7 +153,7 @@ export default function FavoriteCard({ seeker }: FavoriteCardProps) {
                 <Edit3 size={14} />
               </button>
             </div>
-            
+
             {showNoteEdit ? (
               <div className="space-y-2">
                 <textarea
@@ -171,7 +180,8 @@ export default function FavoriteCard({ seeker }: FavoriteCardProps) {
               </div>
             ) : (
               <p className="text-sm text-yellow-700">
-                {currentNote || 'Keine Notiz vorhanden. Klicke auf das Stift-Symbol zum Hinzufügen.'}
+                {currentNote ||
+                  "Keine Notiz vorhanden. Klicke auf das Stift-Symbol zum Hinzufügen."}
               </p>
             )}
           </div>
@@ -193,12 +203,12 @@ export default function FavoriteCard({ seeker }: FavoriteCardProps) {
           </div>
         </div>
       </div>
-      
+
       <ContactDialog
         seeker={seeker}
         isOpen={showContactDialog}
         onClose={() => setShowContactDialog(false)}
       />
     </>
-  )
+  );
 }

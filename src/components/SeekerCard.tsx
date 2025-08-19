@@ -3,7 +3,7 @@ import { Seeker } from "@/features/seekers/types";
 import { cn, formatBudget, formatDate } from "@/lib/utils";
 import { Calendar, Euro, Heart, MapPin, MessageSquare } from "lucide-react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ContactDialog from "./ContactDialog";
 
 interface SeekerCardProps {
@@ -127,12 +127,12 @@ export default function SeekerCard({ seeker }: SeekerCardProps) {
               <MessageSquare size={16} className="mr-2" />
               Kontakt
             </button>
-            <Link
+            {/* <Link
               to={`/seeker/${seeker.id}`}
               className="flex-1 bg-blue-600 text-white text-center py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
             >
               Details
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

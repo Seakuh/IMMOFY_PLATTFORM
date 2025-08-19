@@ -1,13 +1,13 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Menu, User, LogOut } from 'lucide-react'
+import { LogOut, Menu, User } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 interface NavTopProps {
-  onMenuToggle: () => void
+  onMenuToggle: () => void;
 }
 
 export default function NavTop({ onMenuToggle }: NavTopProps) {
-  const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
@@ -20,14 +20,12 @@ export default function NavTop({ onMenuToggle }: NavTopProps) {
           <Menu size={24} />
         </button>
 
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
         >
-          <img src="/logo.svg" alt="immofy Logo" className="w-8 h-8" />
-          <span className="text-xl font-semibold text-gray-900">
-            immofy
-          </span>
+          <img src="/logo.png" alt="immofy Logo" className="w-8 h-8" />
+          <span className="text-xl font-semibold text-gray-900">immofy</span>
         </Link>
 
         <div className="relative">
@@ -41,8 +39,8 @@ export default function NavTop({ onMenuToggle }: NavTopProps) {
 
           {showProfileMenu && (
             <>
-              <div 
-                className="fixed inset-0 z-10" 
+              <div
+                className="fixed inset-0 z-10"
                 onClick={() => setShowProfileMenu(false)}
               />
               <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[150px] z-20">
@@ -57,7 +55,7 @@ export default function NavTop({ onMenuToggle }: NavTopProps) {
                 <button
                   className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   onClick={() => {
-                    setShowProfileMenu(false)
+                    setShowProfileMenu(false);
                     // TODO: Implement logout
                   }}
                 >
@@ -70,5 +68,5 @@ export default function NavTop({ onMenuToggle }: NavTopProps) {
         </div>
       </div>
     </header>
-  )
+  );
 }
