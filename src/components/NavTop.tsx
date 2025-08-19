@@ -10,7 +10,7 @@ export default function NavTop({ onMenuToggle }: NavTopProps) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
+    <header className="fixed top-0 left-0 right-0 bg-white/70 border-b border-gray-200 backdrop-blur z-50">
       <div className="flex items-center justify-between px-4 h-16">
         <button
           onClick={onMenuToggle}
