@@ -1,35 +1,37 @@
 name: Deploy IMMOFY
-
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Application
         run: npm run build
 
-      - name: Deploy to FTP
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+      - name: Deploy to FTP (FTPS explicit, loose TLS)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps # explizites FTPS (neuere Standard)
+          port: 21 # viele Hoster nutzen weiter 21 für FTPS (explizit)
+          security: loose # akzeptiert z. B. SNI/Self-Signed Besonderheiten
+          timeout: 60000 # 60s, hilft gegen Verbindungsabbrüche
           local-dir: dist/
+          server-dir: /public_html/ # <— an deinen Root anpassen, Slash am Ende!
           log-level: verbose
           dangerous-clean-slate: false
