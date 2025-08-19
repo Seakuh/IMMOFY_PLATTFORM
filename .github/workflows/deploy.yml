@@ -31,6 +31,5 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: dist/
-          keepalive: 300000 # Setzt die Verbindung auf 5 Minuten Inaktivität
           log-level: verbose
-          dangerous-clean-slate: false # Entfernt nicht verwendete Dateien
+          dangerous-clean-slate: false
