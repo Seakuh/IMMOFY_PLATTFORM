@@ -1,37 +1,40 @@
-name: Deploy IMMOFY
+name: Deploy Frontend to FTP
+
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: 18
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
+        working-directory: frontend
 
       - name: Build Application
         run: npm run build
+        working-directory: frontend
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      - name: Deploy to FTP (FTPS explicit, strict)
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy to FTP
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          port: 21
-          security: strict
-          timeout: 120000
-          local-dir: dist/
-          server-dir: /public_html/
+          local-dir: dist
+          keepalive: 300000
           log-level: verbose
           dangerous-clean-slate: false
