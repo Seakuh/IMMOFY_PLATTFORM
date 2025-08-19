@@ -27,11 +27,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps # explizites FTPS (neuere Standard)
-          port: 21 # viele Hoster nutzen weiter 21 für FTPS (explizit)
-          security: loose # akzeptiert z. B. SNI/Self-Signed Besonderheiten
           timeout: 60000 # 60s, hilft gegen Verbindungsabbrüche
           local-dir: dist/
-          server-dir: /public_html/ # <— an deinen Root anpassen, Slash am Ende!
           log-level: verbose
           dangerous-clean-slate: false
