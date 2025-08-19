@@ -1,7 +1,7 @@
 import { useFavoritesStore } from "@/features/favorites/store";
 import { Seeker } from "@/features/seekers/types";
 import { cn, formatBudget, formatDate } from "@/lib/utils";
-import { Calendar, Euro, Heart, MapPin, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ContactDialog from "./ContactDialog";
@@ -60,23 +60,30 @@ export default function SeekerCard({ seeker }: SeekerCardProps) {
                 : "bg-white text-gray-600 hover:text-red-500"
             )}
           >
-            <img 
-              src="/icons/heart.svg" 
-              alt="Favorite" 
+            <img
+              src="/icons/heart.svg"
+              alt="Favorite"
               className={cn(
                 "w-5 h-5 transition-colors",
                 isFavorited ? "filter brightness-0 invert" : ""
               )}
-              style={isFavorited ? {} : { filter: 'brightness(0) saturate(100%) invert(44%) sepia(7%) saturate(447%) hue-rotate(203deg) brightness(88%) contrast(86%)' }}
+              style={
+                isFavorited
+                  ? {}
+                  : {
+                      filter:
+                        "brightness(0) saturate(100%) invert(44%) sepia(7%) saturate(447%) hue-rotate(203deg) brightness(88%) contrast(86%)",
+                    }
+              }
             />
           </button>
         </div>
 
         <div className="p-4">
           <h3 className="font-semibold text-lg text-gray-900 mb-2">
-            {seeker.name || 'Unbekannt'}
+            {seeker.name || "Unbekannt"}
           </h3>
-          
+
           {seeker.headline && (
             <p className="text-sm text-blue-600 mb-2 font-medium">
               {seeker.headline}
@@ -86,11 +93,14 @@ export default function SeekerCard({ seeker }: SeekerCardProps) {
           <div className="space-y-2 mb-3">
             {(seeker.budgetMin || seeker.budgetMax) && (
               <div className="flex items-center text-sm text-gray-600">
-                <img 
-                  src="/icons/euro.svg" 
-                  alt="Price" 
+                <img
+                  src="/icons/euro.svg"
+                  alt="Price"
                   className="w-4 h-4 mr-2"
-                  style={{ filter: 'brightness(0) saturate(100%) invert(44%) sepia(7%) saturate(447%) hue-rotate(203deg) brightness(88%) contrast(86%)' }}
+                  style={{
+                    filter:
+                      "brightness(0) saturate(100%) invert(44%) sepia(7%) saturate(447%) hue-rotate(203deg) brightness(88%) contrast(86%)",
+                  }}
                 />
                 {formatBudget(seeker.budgetMin, seeker.budgetMax)}
               </div>
@@ -98,11 +108,14 @@ export default function SeekerCard({ seeker }: SeekerCardProps) {
 
             {seeker.locations.length > 0 && (
               <div className="flex items-start text-sm text-gray-600">
-                <img 
-                  src="/icons/location.svg" 
-                  alt="Location" 
+                <img
+                  src="/icons/location.svg"
+                  alt="Location"
                   className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0"
-                  style={{ filter: 'brightness(0) saturate(100%) invert(44%) sepia(7%) saturate(447%) hue-rotate(203deg) brightness(88%) contrast(86%)' }}
+                  style={{
+                    filter:
+                      "brightness(0) saturate(100%) invert(44%) sepia(7%) saturate(447%) hue-rotate(203deg) brightness(88%) contrast(86%)",
+                  }}
                 />
                 <span className="line-clamp-1">
                   {seeker.locations.join(", ")}
@@ -112,11 +125,14 @@ export default function SeekerCard({ seeker }: SeekerCardProps) {
 
             {seeker.moveInFrom && (
               <div className="flex items-center text-sm text-gray-600">
-                <img 
-                  src="/icons/calendar.svg" 
-                  alt="Move-in date" 
+                <img
+                  src="/icons/calendar.svg"
+                  alt="Move-in date"
                   className="w-4 h-4 mr-2"
-                  style={{ filter: 'brightness(0) saturate(100%) invert(44%) sepia(7%) saturate(447%) hue-rotate(203deg) brightness(88%) contrast(86%)' }}
+                  style={{
+                    filter:
+                      "brightness(0) saturate(100%) invert(44%) sepia(7%) saturate(447%) hue-rotate(203deg) brightness(88%) contrast(86%)",
+                  }}
                 />
                 ab {formatDate(seeker.moveInFrom)}
               </div>

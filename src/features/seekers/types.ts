@@ -1,6 +1,6 @@
 export interface Seeker {
   id: string;
-  name?: string;
+  name: string;
   headline?: string;
   avatarUrl?: string;
   budgetMin?: number;
