@@ -1,0 +1,25 @@
+import { Routes, Route } from 'react-router-dom'
+import Layout from './app/Layout'
+import Home from './pages/Home'
+import Explore from './pages/Explore'
+import Faves from './pages/Faves'
+import Account from './pages/Account'
+import History from './pages/History'
+import SeekerDetail from './pages/SeekerDetail'
+
+function App() {
+  return (
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/faves" element={<Faves />} />
+        <Route path="/account" element={<Account />} />
+        <Route path="/history" element={<History />} />
+        <Route path="/seeker/:id" element={<SeekerDetail />} />
+      </Routes>
+    </Layout>
+  )
+}
+
+export default App

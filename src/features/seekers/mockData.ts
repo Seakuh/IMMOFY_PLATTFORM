@@ -1,0 +1,74 @@
+import { Seeker } from './types'
+
+export const mockSeekers: Seeker[] = [
+  {
+    id: '1',
+    name: 'Anna Schmidt',
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&h=150&fit=crop&crop=face',
+    budgetMin: 800,
+    budgetMax: 1200,
+    locations: ['Mitte', 'Prenzlauer Berg'],
+    moveInFrom: '2024-03-01',
+    roomsMin: 2,
+    pets: false,
+    tags: ['Nichtraucher', 'Ruhig', 'Student'],
+    bio: 'Suche eine gemütliche 2-Zimmer Wohnung in zentraler Lage. Bin Masterstudentin und sehr zuverlässig.',
+    createdAt: '2024-01-15T10:30:00Z'
+  },
+  {
+    id: '2',
+    name: 'Max Müller',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+    budgetMin: 1000,
+    budgetMax: 1500,
+    locations: ['Kreuzberg', 'Friedrichshain'],
+    moveInFrom: '2024-02-15',
+    roomsMin: 3,
+    pets: true,
+    tags: ['Haustiere', 'Musik', 'Kreativ'],
+    bio: 'Freiberuflicher Designer mit Hund sucht WG oder eigene Wohnung. Spiele gerne Gitarre.',
+    createdAt: '2024-01-20T14:45:00Z'
+  },
+  {
+    id: '3',
+    name: 'Sarah Johnson',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face',
+    budgetMin: 600,
+    budgetMax: 900,
+    locations: ['Wedding', 'Moabit'],
+    moveInFrom: '2024-04-01',
+    roomsMin: 1,
+    pets: false,
+    tags: ['Pendler', 'Ordentlich', 'Kochen'],
+    bio: 'Arbeite in der Innenstadt und suche eine kleine, aber feine Wohnung mit guter Verkehrsanbindung.',
+    createdAt: '2024-01-18T09:15:00Z'
+  },
+  {
+    id: '4',
+    name: 'Tom Weber',
+    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+    budgetMin: 1200,
+    budgetMax: 1800,
+    locations: ['Charlottenburg', 'Wilmersdorf'],
+    moveInFrom: '2024-03-15',
+    roomsMin: 2,
+    pets: false,
+    tags: ['Berufstätig', 'Sport', 'Balkon'],
+    bio: 'Softwareentwickler sucht moderne Wohnung mit Balkon. Bin viel unterwegs, daher sehr pflegeleicht.',
+    createdAt: '2024-01-22T16:20:00Z'
+  },
+  {
+    id: '5',
+    name: 'Lisa Chen',
+    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
+    budgetMin: 700,
+    budgetMax: 1000,
+    locations: ['Neukölln', 'Kreuzberg'],
+    moveInFrom: '2024-05-01',
+    roomsMin: 1,
+    pets: true,
+    tags: ['Katze', 'Yoga', 'Vegetarisch'],
+    bio: 'Yoga-Lehrerin mit einer sehr lieben Katze sucht ruhige Wohnung mit Grünblick.',
+    createdAt: '2024-01-25T11:10:00Z'
+  }
+]
