@@ -22,9 +22,12 @@ export default function NavTop({ onMenuToggle }: NavTopProps) {
 
         <Link 
           to="/" 
-          className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors"
+          className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
         >
-          immofy
+          <img src="/logo.svg" alt="immofy Logo" className="w-8 h-8" />
+          <span className="text-xl font-semibold text-gray-900">
+            immofy
+          </span>
         </Link>
 
         <div className="relative">

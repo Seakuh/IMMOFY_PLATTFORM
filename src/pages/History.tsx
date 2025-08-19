@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import SeekerCard from '@/components/SeekerCard'
 import EmptyState from '@/components/EmptyState'
-import { useHistoryStore } from '@/features/seekers/store'
+import { useHistoryStore } from '@/features/favorites/store'
 import { mockSeekers } from '@/features/seekers/mockData'
 import { formatDate } from '@/lib/utils'
 

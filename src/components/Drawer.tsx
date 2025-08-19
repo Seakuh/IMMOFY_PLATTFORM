@@ -45,7 +45,10 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold">immofy</h2>
+          <div className="flex items-center space-x-2">
+            <img src="/logo.svg" alt="immofy Logo" className="w-6 h-6" />
+            <h2 className="text-xl font-semibold">immofy</h2>
+          </div>
           <button
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"

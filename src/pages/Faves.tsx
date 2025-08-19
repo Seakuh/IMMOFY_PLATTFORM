@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import SeekerCard from '@/components/SeekerCard'
+import FavoriteCard from '@/components/FavoriteCard'
 import EmptyState from '@/components/EmptyState'
-import { useFavoritesStore } from '@/features/seekers/store'
+import { useFavoritesStore } from '@/features/favorites/store'
 import { mockSeekers } from '@/features/seekers/mockData'
 
 export default function Faves() {
@@ -34,7 +34,7 @@ export default function Faves() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {favoriteSeekers.map((seeker) => (
-              <SeekerCard key={seeker.id} seeker={seeker} />
+              <FavoriteCard key={seeker.id} seeker={seeker} />
             ))}
           </div>
         </>

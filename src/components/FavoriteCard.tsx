@@ -1,39 +1,50 @@
-import { useFavoritesStore } from "@/features/favorites/store";
-import { Seeker } from "@/features/seekers/types";
-import { cn, formatBudget, formatDate } from "@/lib/utils";
-import { Calendar, Euro, Heart, MapPin, MessageSquare } from "lucide-react";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import ContactDialog from "./ContactDialog";
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Heart, MapPin, Calendar, Euro, MessageSquare, StickyNote, Edit3 } from 'lucide-react'
+import { Seeker } from '@/features/seekers/types'
+import { formatBudget, formatDate, cn } from '@/lib/utils'
+import { useFavoritesStore } from '@/features/favorites/store'
+import ContactDialog from './ContactDialog'
 
-interface SeekerCardProps {
-  seeker: Seeker;
+interface FavoriteCardProps {
+  seeker: Seeker
 }
 
-export default function SeekerCard({ seeker }: SeekerCardProps) {
-  const { favorites, toggleFavorite } = useFavoritesStore();
-  const [imageError, setImageError] = useState(false);
-  const [showContactDialog, setShowContactDialog] = useState(false);
-  const isFavorited = favorites.includes(seeker.id);
-  const navigate = useNavigate();
+export default function FavoriteCard({ seeker }: FavoriteCardProps) {
+  const { favorites, toggleFavorite, updateNote, getNote } = useFavoritesStore()
+  const [imageError, setImageError] = useState(false)
+  const [showContactDialog, setShowContactDialog] = useState(false)
+  const [showNoteEdit, setShowNoteEdit] = useState(false)
+  const [noteText, setNoteText] = useState(getNote(seeker.id))
+  const isFavorited = favorites.includes(seeker.id)
+
   const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleFavorite(seeker.id);
-  };
+    e.preventDefault()
+    e.stopPropagation()
+    toggleFavorite(seeker.id)
+  }
 
   const handleContactClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setShowContactDialog(true);
-  };
+    e.preventDefault()
+    e.stopPropagation()
+    setShowContactDialog(true)
+  }
+
+  const handleSaveNote = () => {
+    updateNote(seeker.id, noteText)
+    setShowNoteEdit(false)
+  }
+
+  const handleCancelNote = () => {
+    setNoteText(getNote(seeker.id))
+    setShowNoteEdit(false)
+  }
+
+  const currentNote = getNote(seeker.id)
 
   return (
     <>
-      <div
-        onClick={() => navigate(`/seeker/${seeker.id}`)}
-        className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
-      >
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group">
         <div className="relative">
           {!imageError && seeker.avatarUrl ? (
             <img
@@ -51,17 +62,17 @@ export default function SeekerCard({ seeker }: SeekerCardProps) {
               </div>
             </div>
           )}
-
+          
           <button
             onClick={handleFavoriteClick}
             className={cn(
               "absolute top-3 right-3 p-2 rounded-full shadow-sm transition-colors",
-              isFavorited
-                ? "bg-red-500 text-white hover:bg-red-600"
+              isFavorited 
+                ? "bg-red-500 text-white hover:bg-red-600" 
                 : "bg-white text-gray-600 hover:text-red-500"
             )}
           >
-            <Heart size={18} fill={isFavorited ? "currentColor" : "none"} />
+            <Heart size={18} fill={isFavorited ? 'currentColor' : 'none'} />
           </button>
         </div>
 
@@ -77,16 +88,16 @@ export default function SeekerCard({ seeker }: SeekerCardProps) {
                 {formatBudget(seeker.budgetMin, seeker.budgetMax)}
               </div>
             )}
-
+            
             {seeker.locations.length > 0 && (
               <div className="flex items-start text-sm text-gray-600">
                 <MapPin size={14} className="mr-2 mt-0.5 flex-shrink-0" />
                 <span className="line-clamp-1">
-                  {seeker.locations.join(", ")}
+                  {seeker.locations.join(', ')}
                 </span>
               </div>
             )}
-
+            
             {seeker.moveInFrom && (
               <div className="flex items-center text-sm text-gray-600">
                 <Calendar size={14} className="mr-2" />
@@ -119,6 +130,52 @@ export default function SeekerCard({ seeker }: SeekerCardProps) {
             </div>
           )}
 
+          {/* Notes Section */}
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center text-sm font-medium text-yellow-800">
+                <StickyNote size={14} className="mr-1" />
+                Meine Notiz
+              </div>
+              <button
+                onClick={() => setShowNoteEdit(true)}
+                className="text-yellow-600 hover:text-yellow-700 p-1"
+              >
+                <Edit3 size={14} />
+              </button>
+            </div>
+            
+            {showNoteEdit ? (
+              <div className="space-y-2">
+                <textarea
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  placeholder="Notiz hinzufügen..."
+                  className="w-full text-sm p-2 border border-yellow-300 rounded focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
+                  rows={3}
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveNote}
+                    className="px-3 py-1 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700 transition-colors"
+                  >
+                    Speichern
+                  </button>
+                  <button
+                    onClick={handleCancelNote}
+                    className="px-3 py-1 bg-gray-300 text-gray-700 text-xs rounded hover:bg-gray-400 transition-colors"
+                  >
+                    Abbrechen
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-yellow-700">
+                {currentNote || 'Keine Notiz vorhanden. Klicke auf das Stift-Symbol zum Hinzufügen.'}
+              </p>
+            )}
+          </div>
+
           <div className="flex gap-2">
             <button
               onClick={handleContactClick}
@@ -136,12 +193,12 @@ export default function SeekerCard({ seeker }: SeekerCardProps) {
           </div>
         </div>
       </div>
-
+      
       <ContactDialog
         seeker={seeker}
         isOpen={showContactDialog}
         onClose={() => setShowContactDialog(false)}
       />
     </>
-  );
+  )
 }
