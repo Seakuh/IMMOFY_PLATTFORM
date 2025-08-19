@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
-import { User, Settings, Heart, Clock, LogOut, Home, MessageSquare, TrendingUp } from 'lucide-react'
+import { User, Settings, Heart, Clock, LogOut, Home, MessageSquare, TrendingUp, Plus } from 'lucide-react'
 import { useFavoritesStore } from '@/features/favorites/store'
 import { useHistoryStore } from '@/features/favorites/store'
 import { useContactsStore } from '@/features/contacts/store'
 import { mockSeekers } from '@/features/seekers/mockData'
+import { mockProperties } from '@/features/properties/mockData'
 import FavoriteCard from '@/components/FavoriteCard'
 import SeekerCard from '@/components/SeekerCard'
+import PropertyCard from '@/components/PropertyCard'
 
 export default function Account() {
   const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'favorites' | 'contacts'>('overview')
@@ -22,24 +24,20 @@ export default function Account() {
     return mockSeekers.filter(seeker => contactedIds.includes(seeker.id))
   }, [threads])
 
-  const mockOwnListings = [
-    {
-      id: '1',
-      title: '3-Zimmer Wohnung in Mitte',
-      price: '1200€',
-      views: 45,
-      interested: 8,
-      status: 'active'
-    },
-    {
-      id: '2', 
-      title: '2-Zimmer mit Balkon in Prenzlauer Berg',
-      price: '950€',
-      views: 32,
-      interested: 5,
-      status: 'active'
-    }
-  ]
+  const handleEditProperty = (property: any) => {
+    console.log('Edit property:', property)
+    // TODO: Open edit dialog
+  }
+
+  const handleDeleteProperty = (propertyId: string) => {
+    console.log('Delete property:', propertyId)
+    // TODO: Implement delete functionality
+  }
+
+  const handleTogglePropertyStatus = (propertyId: string) => {
+    console.log('Toggle property status:', propertyId)
+    // TODO: Implement status toggle
+  }
 
   return (
     <div className="space-y-6">
@@ -119,7 +117,7 @@ export default function Account() {
                     <div className="text-sm text-gray-500">Kontaktiert</div>
                   </div>
                   <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">{mockOwnListings.length}</div>
+                    <div className="text-2xl font-bold text-orange-600">{mockProperties.length}</div>
                     <div className="text-sm text-gray-500">Anzeigen</div>
                   </div>
                 </div>
@@ -156,36 +154,33 @@ export default function Account() {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Meine Anzeigen
+                  Meine Anzeigen ({mockProperties.length})
                 </h3>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  <Plus size={16} className="mr-2" />
                   Neue Anzeige
                 </button>
               </div>
 
-              <div className="space-y-4">
-                {mockOwnListings.map((listing) => (
-                  <div key={listing.id} className="p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-gray-900">{listing.title}</h4>
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                        {listing.status === 'active' ? 'Aktiv' : 'Inaktiv'}
-                      </span>
-                    </div>
-                    <p className="text-lg font-semibold text-blue-600 mb-2">{listing.price}</p>
-                    <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      <span className="flex items-center">
-                        <TrendingUp size={14} className="mr-1" />
-                        {listing.views} Aufrufe
-                      </span>
-                      <span className="flex items-center">
-                        <Heart size={14} className="mr-1" />
-                        {listing.interested} Interessiert
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {mockProperties.length === 0 ? (
+                <div className="text-center py-8">
+                  <Home size={48} className="mx-auto mb-4 text-gray-300" />
+                  <p className="text-gray-500">Noch keine Anzeigen</p>
+                  <p className="text-sm text-gray-400">Erstelle deine erste Immobilienanzeige</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {mockProperties.map((property) => (
+                    <PropertyCard
+                      key={property.id}
+                      property={property}
+                      onEdit={handleEditProperty}
+                      onDelete={handleDeleteProperty}
+                      onToggleStatus={handleTogglePropertyStatus}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

@@ -49,6 +49,7 @@ export default function ContactDialog({ seeker, isOpen, onClose }: ContactDialog
 
   const handleSendMessage = () => {
     if (message.trim()) {
+      console.log(`Message sent to ${seeker.name || 'Unknown'} (ID: ${seeker.id}): ${message.trim()}`);
       addMessage(seeker.id, message.trim())
       setMessage('')
     }
@@ -85,12 +86,12 @@ export default function ContactDialog({ seeker, isOpen, onClose }: ContactDialog
                 />
               ) : (
                 <span className="text-gray-500 font-semibold">
-                  {seeker.name.charAt(0).toUpperCase()}
+                  {seeker.name?.charAt(0).toUpperCase() || '?'}
                 </span>
               )}
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">{seeker.name}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{seeker.name || 'Unbekannt'}</h3>
               <p className="text-sm text-gray-500">Kontakt</p>
             </div>
           </div>
@@ -164,6 +165,15 @@ export default function ContactDialog({ seeker, isOpen, onClose }: ContactDialog
                     <MessageSquare size={48} className="mx-auto mb-4 text-gray-300" />
                     <p>Noch keine Nachrichten</p>
                     <p className="text-sm">Sende die erste Nachricht!</p>
+                  </div>
+                )}
+                
+                {/* Show a preview of sent message */}
+                {thread?.messages && thread.messages.length > 0 && thread.messages[thread.messages.length - 1].isOwn && (
+                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-sm text-green-800">
+                      <strong>Du hast geschrieben:</strong> {thread.messages[thread.messages.length - 1].message}
+                    </p>
                   </div>
                 )}
                 <div ref={messagesEndRef} />

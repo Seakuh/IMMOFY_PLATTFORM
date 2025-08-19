@@ -111,8 +111,14 @@ export default function SeekerDetail() {
         <div className="p-6">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {seeker.name}
+              {seeker.name || 'Unbekannt'}
             </h1>
+            
+            {seeker.headline && (
+              <p className="text-lg text-blue-600 mb-4 font-medium">
+                {seeker.headline}
+              </p>
+            )}
             
             <div className="flex flex-wrap gap-4 text-sm text-gray-600">
               {(seeker.budgetMin || seeker.budgetMax) && (

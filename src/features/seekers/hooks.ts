@@ -9,7 +9,8 @@ function filterSeekers(seekers: Seeker[], filters: SearchFilters): Seeker[] {
     if (filters.search) {
       const searchLower = filters.search.toLowerCase()
       const matchesSearch = 
-        seeker.name.toLowerCase().includes(searchLower) ||
+        seeker.name?.toLowerCase().includes(searchLower) ||
+        seeker.headline?.toLowerCase().includes(searchLower) ||
         seeker.locations.some(loc => loc.toLowerCase().includes(searchLower)) ||
         seeker.tags?.some(tag => tag.toLowerCase().includes(searchLower)) ||
         seeker.bio?.toLowerCase().includes(searchLower)

@@ -36,6 +36,7 @@ export default function FavoriteCard({ seeker }: FavoriteCardProps) {
   const handleContactClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log(`Contact clicked for Seeker-ID: ${seeker.id}`);
     setShowContactDialog(true);
   };
 
@@ -53,7 +54,7 @@ export default function FavoriteCard({ seeker }: FavoriteCardProps) {
 
   return (
     <>
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-200 ease-in-out group">
         <div className="relative">
           {!imageError && seeker.avatarUrl ? (
             <img
@@ -63,13 +64,11 @@ export default function FavoriteCard({ seeker }: FavoriteCardProps) {
               onError={() => setImageError(true)}
             />
           ) : (
-            <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-              <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-gray-500 text-xl font-semibold">
-                  {seeker.name.charAt(0).toUpperCase()}
-                </span>
-              </div>
-            </div>
+            <img
+              src="/anonymous.jpeg"
+              alt="Anonymous"
+              className="w-full h-48 object-cover"
+            />
           )}
 
           <button
@@ -87,8 +86,14 @@ export default function FavoriteCard({ seeker }: FavoriteCardProps) {
 
         <div className="p-4">
           <h3 className="font-semibold text-lg text-gray-900 mb-2">
-            {seeker.name}
+            {seeker.name || 'Unbekannt'}
           </h3>
+          
+          {seeker.headline && (
+            <p className="text-sm text-blue-600 mb-2 font-medium">
+              {seeker.headline}
+            </p>
+          )}
 
           <div className="space-y-2 mb-3">
             {(seeker.budgetMin || seeker.budgetMax) && (
