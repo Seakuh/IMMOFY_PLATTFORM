@@ -21,11 +21,17 @@ jobs:
       - name: Build Application
         run: npm run build
 
-      - name: Deploy to FTP (FTPS explicit, loose TLS)
+      - name: Deploy to FTP (FTPS explicit, strict)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          security: strict
+          timeout: 120000
           local-dir: dist/
+          server-dir: /public_html/
+          log-level: verbose
           dangerous-clean-slate: false
