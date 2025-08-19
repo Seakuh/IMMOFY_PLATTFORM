@@ -27,7 +27,5 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          timeout: 60000 # 60s, hilft gegen Verbindungsabbrüche
           local-dir: dist/
-          log-level: verbose
           dangerous-clean-slate: false
