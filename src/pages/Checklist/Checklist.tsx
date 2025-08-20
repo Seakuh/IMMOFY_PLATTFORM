@@ -1,19 +1,59 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./Checklist.css";
 
 const Checklist: React.FC = () => {
   const defaultItems = [
-    { id: 1, text: "💰 Budget festlegen: Überlege dir, wie viel Miete du zahlen kannst, inkl. Nebenkosten und Kaution." , checked: false },
-    { id: 2, text: "🏡 Suchkriterien definieren: Zimmeranzahl, Lage, Balkon, Stellplatz, Haustiere erlaubt?" , checked: false },
-    { id: 3, text: "📄 Alle Unterlagen vorbereiten: Schufa-Auskunft, Gehaltsnachweise, Mietschuldenfreiheitsbescheinigung, etc." , checked: false },
-    { id: 4, text: "🌐 Realistische Plattformen nutzen: Suche auf ImmobilienScout24, Immowelt, Immonet oder eBay Kleinanzeigen." , checked: false },
-    { id: 5, text: "🗓️ Zeit für Besichtigungen einplanen: Plane mehrere Termine und sei pünktlich." , checked: false },
-    { id: 6, text: "🔍 Kritisch prüfen bei Besichtigungen: Zustand von Wohnung, Lage und Gemeinschaftsflächen prüfen." , checked: false },
-    { id: 7, text: "🗂️ Überzeugende Bewerbungsmappe erstellen: Personalisiertes Anschreiben und relevante Unterlagen bereithalten." , checked: false },
-    { id: 8, text: "📞 Kommunikation mit Vermietern optimieren: Sei höflich und stelle gezielte Fragen zu Vertrag und Nebenkosten." , checked: false },
-    { id: 9, text: "📝 Mietvertrag genau prüfen: Lies den Vertrag gründlich und kläre offene Punkte." , checked: false },
-    { id: 10, text: "🛠️ Backup-Strategien vorbereiten: Suche nach Übergangslösungen oder anderen Stadtteilen, falls nötig." , checked: false },
-];
+    {
+      id: 1,
+      text: "💰 Budget festlegen: Überlege dir, wie viel Miete du zahlen kannst, inkl. Nebenkosten und Kaution.",
+      checked: false,
+    },
+    {
+      id: 2,
+      text: "🏡 Suchkriterien definieren: Zimmeranzahl, Lage, Balkon, Stellplatz, Haustiere erlaubt?",
+      checked: false,
+    },
+    {
+      id: 3,
+      text: "📄 Alle Unterlagen vorbereiten: Schufa-Auskunft, Gehaltsnachweise, Mietschuldenfreiheitsbescheinigung, etc.",
+      checked: false,
+    },
+    {
+      id: 4,
+      text: "🌐 Realistische Plattformen nutzen: Suche auf ImmobilienScout24, Immowelt, Immonet oder eBay Kleinanzeigen.",
+      checked: false,
+    },
+    {
+      id: 5,
+      text: "🗓️ Zeit für Besichtigungen einplanen: Plane mehrere Termine und sei pünktlich.",
+      checked: false,
+    },
+    {
+      id: 6,
+      text: "🔍 Kritisch prüfen bei Besichtigungen: Zustand von Wohnung, Lage und Gemeinschaftsflächen prüfen.",
+      checked: false,
+    },
+    {
+      id: 7,
+      text: "🗂️ Überzeugende Bewerbungsmappe erstellen: Personalisiertes Anschreiben und relevante Unterlagen bereithalten.",
+      checked: false,
+    },
+    {
+      id: 8,
+      text: "📞 Kommunikation mit Vermietern optimieren: Sei höflich und stelle gezielte Fragen zu Vertrag und Nebenkosten.",
+      checked: false,
+    },
+    {
+      id: 9,
+      text: "📝 Mietvertrag genau prüfen: Lies den Vertrag gründlich und kläre offene Punkte.",
+      checked: false,
+    },
+    {
+      id: 10,
+      text: "🛠️ Backup-Strategien vorbereiten: Suche nach Übergangslösungen oder anderen Stadtteilen, falls nötig.",
+      checked: false,
+    },
+  ];
 
   const [checklistItems, setChecklistItems] = useState(() => {
     try {
@@ -76,7 +116,6 @@ const Checklist: React.FC = () => {
       />
     </div>
   );
-  
 };
 
 export default Checklist;

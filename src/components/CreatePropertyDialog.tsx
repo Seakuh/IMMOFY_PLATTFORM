@@ -1,106 +1,112 @@
-import { useState, useRef } from 'react'
-import { X, Upload, MapPin, Home, Euro, Camera, Plus } from 'lucide-react'
-import { PropertyFormData } from '../features/properties/types'
-import { useCreateProperty } from '../features/properties/hooks'
-import { uploadPropertyImages } from '../features/properties/api'
+import { Camera, Euro, Home, MapPin, Plus, X } from "lucide-react";
+import { useRef, useState } from "react";
+import { uploadPropertyImages } from "../features/properties/api";
+import { useCreateProperty } from "../features/properties/hooks";
+import { PropertyFormData } from "../features/properties/types";
 
 interface CreatePropertyDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onSuccess?: (property: any) => void
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: (property: any) => void;
 }
 
-export default function CreatePropertyDialog({ isOpen, onClose, onSuccess }: CreatePropertyDialogProps) {
+export default function CreatePropertyDialog({
+  isOpen,
+  onClose,
+  onSuccess,
+}: CreatePropertyDialogProps) {
   const [formData, setFormData] = useState<PropertyFormData>({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     price: 0,
-    location: '',
+    location: "",
     rooms: 1,
     size: 0,
     images: [],
-    features: []
-  })
-  const [images, setImages] = useState<File[]>([])
-  const [previewUrls, setPreviewUrls] = useState<string[]>([])
-  const [newFeature, setNewFeature] = useState('')
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  
-  const { create, loading, error } = useCreateProperty()
+    features: [],
+  });
+  const [images, setImages] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [newFeature, setNewFeature] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { create, loading, error } = useCreateProperty();
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    setImages(prev => [...prev, ...files])
-    
-    const newPreviewUrls = files.map(file => URL.createObjectURL(file))
-    setPreviewUrls(prev => [...prev, ...newPreviewUrls])
-  }
+    const files = Array.from(e.target.files || []);
+    setImages((prev) => [...prev, ...files]);
+
+    const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
+  };
 
   const removeImage = (index: number) => {
-    URL.revokeObjectURL(previewUrls[index])
-    setImages(prev => prev.filter((_, i) => i !== index))
-    setPreviewUrls(prev => prev.filter((_, i) => i !== index))
-  }
+    URL.revokeObjectURL(previewUrls[index]);
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const addFeature = () => {
     if (newFeature.trim() && !formData.features.includes(newFeature.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        features: [...prev.features, newFeature.trim()]
-      }))
-      setNewFeature('')
+        features: [...prev.features, newFeature.trim()],
+      }));
+      setNewFeature("");
     }
-  }
+  };
 
   const removeFeature = (feature: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      features: prev.features.filter(f => f !== feature)
-    }))
-  }
+      features: prev.features.filter((f) => f !== feature),
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     try {
-      const property = await create(formData)
+      const property = await create(formData);
       if (property && images.length > 0) {
-        await uploadPropertyImages(property.id, images)
+        await uploadPropertyImages(property.id, images);
       }
-      
-      onSuccess?.(property)
-      onClose()
-      resetForm()
+
+      onSuccess?.(property);
+      onClose();
+      resetForm();
     } catch (err) {
-      console.error('Failed to create property:', err)
+      console.error("Failed to create property:", err);
     }
-  }
+  };
 
   const resetForm = () => {
     setFormData({
-      title: '',
-      description: '',
+      title: "",
+      description: "",
       price: 0,
-      location: '',
+      location: "",
       rooms: 1,
       size: 0,
       images: [],
-      features: []
-    })
-    setImages([])
-    previewUrls.forEach(url => URL.revokeObjectURL(url))
-    setPreviewUrls([])
-    setNewFeature('')
-  }
+      features: [],
+    });
+    setImages([]);
+    previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    setPreviewUrls([]);
+    setNewFeature("");
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-[20px] w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-xl font-semibold text-gray-900">Neues Inserat erstellen</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Neues Inserat erstellen
+          </h2>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
@@ -110,7 +116,10 @@ export default function CreatePropertyDialog({ isOpen, onClose, onSuccess }: Cre
         </div>
 
         {/* Content */}
-        <form onSubmit={handleSubmit} className="flex flex-col h-[calc(90vh-80px)]">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col h-[calc(90vh-80px)]"
+        >
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {/* Title */}
             <div>
@@ -122,7 +131,9 @@ export default function CreatePropertyDialog({ isOpen, onClose, onSuccess }: Cre
                 <input
                   type="text"
                   value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, title: e.target.value }))
+                  }
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="z.B. Moderne 3-Zimmer-Wohnung"
                   required
@@ -140,8 +151,13 @@ export default function CreatePropertyDialog({ isOpen, onClose, onSuccess }: Cre
                   <Euro className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type="number"
-                    value={formData.price || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: Number(e.target.value) }))}
+                    value={formData.price || ""}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        price: Number(e.target.value),
+                      }))
+                    }
                     className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="1200"
                     required
@@ -154,11 +170,18 @@ export default function CreatePropertyDialog({ isOpen, onClose, onSuccess }: Cre
                 </label>
                 <select
                   value={formData.rooms}
-                  onChange={(e) => setFormData(prev => ({ ...prev, rooms: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      rooms: Number(e.target.value),
+                    }))
+                  }
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
-                  {[1,2,3,4,5,6].map(num => (
-                    <option key={num} value={num}>{num} Zimmer</option>
+                  {[1, 2, 3, 4, 5, 6].map((num) => (
+                    <option key={num} value={num}>
+                      {num} Zimmer
+                    </option>
                   ))}
                 </select>
               </div>
@@ -175,7 +198,12 @@ export default function CreatePropertyDialog({ isOpen, onClose, onSuccess }: Cre
                   <input
                     type="text"
                     value={formData.location}
-                    onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        location: e.target.value,
+                      }))
+                    }
                     className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="Berlin, Mitte"
                     required
@@ -188,8 +216,13 @@ export default function CreatePropertyDialog({ isOpen, onClose, onSuccess }: Cre
                 </label>
                 <input
                   type="number"
-                  value={formData.size || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, size: Number(e.target.value) }))}
+                  value={formData.size || ""}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      size: Number(e.target.value),
+                    }))
+                  }
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="85"
                 />
@@ -203,7 +236,12 @@ export default function CreatePropertyDialog({ isOpen, onClose, onSuccess }: Cre
               </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                 placeholder="Beschreiben Sie Ihre Immobilie..."
@@ -222,7 +260,9 @@ export default function CreatePropertyDialog({ isOpen, onClose, onSuccess }: Cre
                   className="w-full h-32 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center hover:border-gray-400 transition-colors"
                 >
                   <Camera className="w-8 h-8 text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-500">Bilder hinzufügen</span>
+                  <span className="text-sm text-gray-500">
+                    Bilder hinzufügen
+                  </span>
                 </button>
                 <input
                   ref={fileInputRef}
@@ -232,7 +272,7 @@ export default function CreatePropertyDialog({ isOpen, onClose, onSuccess }: Cre
                   onChange={handleImageUpload}
                   className="hidden"
                 />
-                
+
                 {previewUrls.length > 0 && (
                   <div className="grid grid-cols-3 gap-3">
                     {previewUrls.map((url, index) => (
@@ -267,7 +307,9 @@ export default function CreatePropertyDialog({ isOpen, onClose, onSuccess }: Cre
                     type="text"
                     value={newFeature}
                     onChange={(e) => setNewFeature(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), addFeature())
+                    }
                     className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="Ausstattung hinzufügen"
                   />
@@ -279,7 +321,7 @@ export default function CreatePropertyDialog({ isOpen, onClose, onSuccess }: Cre
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-                
+
                 {formData.features.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {formData.features.map((feature, index) => (
@@ -324,12 +366,12 @@ export default function CreatePropertyDialog({ isOpen, onClose, onSuccess }: Cre
                 disabled={loading || !formData.title || !formData.location}
                 className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Erstelle...' : 'Inserat erstellen'}
+                {loading ? "Erstelle..." : "Inserat erstellen"}
               </button>
             </div>
           </div>
         </form>
       </div>
     </div>
-  )
+  );
 }
