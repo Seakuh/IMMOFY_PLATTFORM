@@ -1,29 +1,38 @@
-import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, MapPin, Calendar, Euro, Home, Heart, Mail, Phone } from 'lucide-react'
-import { useSeeker, useSimilarSeekers } from '@/features/seekers/hooks'
-import { useHistoryStore } from '@/features/favorites/store'
-import { useFavoritesStore } from '@/features/favorites/store'
-import { formatBudget, formatDate, cn } from '@/lib/utils'
-import SeekerCard from '@/components/SeekerCard'
-import Loader from '@/components/Loader'
+import Loader from "@/components/Loader";
+import SeekerCard from "@/components/SeekerCard";
+import { useFavoritesStore, useHistoryStore } from "@/features/favorites/store";
+import { useSeeker, useSimilarSeekers } from "@/features/seekers/hooks";
+import { cn, formatBudget, formatDate } from "@/lib/utils";
+import {
+  ArrowLeft,
+  Calendar,
+  Euro,
+  Heart,
+  Home,
+  Mail,
+  MapPin,
+  Phone,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 
 export default function SeekerDetail() {
-  const { id } = useParams<{ id: string }>()
-  const [imageError, setImageError] = useState(false)
-  
-  const { seeker, loading, error } = useSeeker(id!)
-  const { seekers: similarSeekers, loading: similarLoading } = useSimilarSeekers(id!)
-  const { addToHistory } = useHistoryStore()
-  const { favorites, toggleFavorite } = useFavoritesStore()
+  const { id } = useParams<{ id: string }>();
+  const [imageError, setImageError] = useState(false);
 
-  const isFavorited = seeker ? favorites.includes(seeker.id) : false
+  const { seeker, loading, error } = useSeeker(id!);
+  const { seekers: similarSeekers, loading: similarLoading } =
+    useSimilarSeekers(id!);
+  const { addToHistory } = useHistoryStore();
+  const { favorites, toggleFavorite } = useFavoritesStore();
+
+  const isFavorited = seeker ? favorites.includes(seeker.id) : false;
 
   useEffect(() => {
     if (seeker) {
-      addToHistory(seeker.id)
+      addToHistory(seeker.id);
     }
-  }, [seeker, addToHistory])
+  }, [seeker, addToHistory]);
 
   if (loading) {
     return (
@@ -41,7 +50,7 @@ export default function SeekerDetail() {
           <Loader size="lg" />
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !seeker) {
@@ -60,7 +69,7 @@ export default function SeekerDetail() {
           <p className="text-red-600">Profil konnte nicht geladen werden.</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -73,7 +82,7 @@ export default function SeekerDetail() {
           <ArrowLeft size={20} className="mr-1" />
           Zurück
         </Link>
-        
+
         <button
           onClick={() => toggleFavorite(seeker.id)}
           className={cn(
@@ -83,8 +92,12 @@ export default function SeekerDetail() {
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           )}
         >
-          <Heart size={18} className="mr-2" fill={isFavorited ? 'currentColor' : 'none'} />
-          {isFavorited ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
+          <Heart
+            size={18}
+            className="mr-2"
+            fill={isFavorited ? "currentColor" : "none"}
+          />
+          {isFavorited ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen"}
         </button>
       </div>
 
@@ -111,15 +124,15 @@ export default function SeekerDetail() {
         <div className="p-6">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {seeker.name || 'Unbekannt'}
+              {seeker.name || "Unbekannt"}
             </h1>
-            
+
             {seeker.headline && (
               <p className="text-lg text-blue-600 mb-4 font-medium">
                 {seeker.headline}
               </p>
             )}
-            
+
             <div className="flex flex-wrap gap-4 text-sm text-gray-600">
               {(seeker.budgetMin || seeker.budgetMax) && (
                 <div className="flex items-center">
@@ -127,14 +140,14 @@ export default function SeekerDetail() {
                   {formatBudget(seeker.budgetMin, seeker.budgetMax)}
                 </div>
               )}
-              
+
               {seeker.roomsMin && (
                 <div className="flex items-center">
                   <Home size={16} className="mr-2" />
                   {seeker.roomsMin}+ Zimmer
                 </div>
               )}
-              
+
               {seeker.moveInFrom && (
                 <div className="flex items-center">
                   <Calendar size={16} className="mr-2" />
@@ -146,13 +159,17 @@ export default function SeekerDetail() {
 
           {seeker.bio && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Über mich</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Über mich
+              </h3>
               <p className="text-gray-700 leading-relaxed">{seeker.bio}</p>
             </div>
           )}
 
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Gewünschte Standorte</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              Gewünschte Standorte
+            </h3>
             <div className="flex flex-wrap gap-2">
               {seeker.locations.map((location) => (
                 <span
@@ -168,7 +185,9 @@ export default function SeekerDetail() {
 
           {seeker.tags && seeker.tags.length > 0 && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Eigenschaften</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Eigenschaften
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {seeker.tags.map((tag) => (
                   <span
@@ -202,7 +221,7 @@ export default function SeekerDetail() {
           <h2 className="text-xl font-bold text-gray-900 mb-4">
             Ähnliche Profile
           </h2>
-          
+
           {similarLoading ? (
             <div className="flex justify-center py-8">
               <Loader />
@@ -217,5 +236,5 @@ export default function SeekerDetail() {
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -13,8 +13,20 @@ export const mockSeekers: Seeker[] = [
     roomsMin: 2,
     pets: false,
     tags: ["Nichtraucher", "Ruhig", "Student"],
-    bio: "Suche eine gemütliche 2-Zimmer Wohnung in zentraler Lage. Bin Masterstudentin und sehr zuverlässig.",
-    createdAt: "2024-01-15T10:30:00Z",
+    bio: `**Betreff: Ihr zukünftiger Mieter – ordentlich, hilfsbereit und zuverlässig!**
+
+Sehr geehrte Damen und Herren,
+
+mit großem Interesse bewerbe ich mich um eine Ihrer Wohnungen. Als ordentlicher und hilfsbereiter Mieter lege ich großen Wert auf ein harmonisches Wohnumfeld und die Pflege der Räumlichkeiten. Ich bin sehr pflichtbewusst und ehrgeizig in allem, was ich tue, und ich wäre Ihnen dankbar für die Möglichkeit, dies in Ihrer Wohnung zu zeigen. 🌱
+
+Ich verfüge über eine Haftpflichtversicherung, die Ihnen zusätzliche Sicherheit gibt. Zudem kümmere ich mich gerne um Pflanzen, sodass Ihr Wohnraum immer grün und einladend bleibt. 🌿🌼
+
+- Ordentlich und verantwortungsbewusst 🧹
+- Hilfsbereit und freundlich 🤝
+- Zuverlässig und pflichtbewusst 📅
+
+Ich freue mich darauf, von Ihnen zu hören und hoffe auf eine positive Rückmeldung. 🌸",
+    createdAt: "2024-01-15T10:30:00Z`,
   },
   {
     id: "2",

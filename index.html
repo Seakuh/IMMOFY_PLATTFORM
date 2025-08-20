@@ -1,10 +1,108 @@
-<!doctype html>
-<html lang="de">
+<!DOCTYPE html>
+<html lang="en">
   <head>
+    <!--
+      ✅ SEO-optimized shell for immofy.org (find tenants fairly & stay organized)
+      Notes:
+      1) Canonical/OG/Twitter/JSON-LD updated for https://immofy.org/.
+      2) /logo.png is used as the preview image (Open Graph & Twitter & Apple Touch Icon).
+      3) Optional: provide /manifest.json if you want PWA features (link included).
+      4) AI is referenced only as a supportive feature, not the core.
+    -->
+
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>immofy - Wohnungssuchende finden</title>
+
+    <title>immofy - Find the right tenants: fair, organized & fast</title>
+
+    <!-- Meta: Description & Robots -->
+    <meta
+      name="description"
+      content="immofy helps landlords find suitable tenants quickly and fairly. Keep applications organized, communicate in one place, and streamline decisions with smart, privacy-conscious tools."
+    />
+    <meta
+      name="robots"
+      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
+    />
+    <meta
+      name="keywords"
+      content="find tenants, tenant search, rent out apartment, landlord tools, rental applications, property management, immofy"
+    />
+    <meta name="theme-color" content="#ffffff" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://immofy.org/" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="immofy" />
+    <meta
+      property="og:title"
+      content="immofy – Find the right tenants: fair, organized & fast"
+    />
+    <meta
+      property="og:description"
+      content="Find suitable tenants faster with clear workflows, organized applications, and privacy‑first screening tools."
+    />
+    <meta property="og:url" content="https://immofy.org/" />
+    <meta property="og:image" content="https://immofy.org/logo.png" />
+    <meta property="og:image:alt" content="immofy logo" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="immofy – Find the right tenants: fair, organized & fast"
+    />
+    <meta
+      name="twitter:description"
+      content="Organize rental applications, communicate in one place, and make informed decisions with smart tools."
+    />
+    <meta name="twitter:image" content="https://immofy.org/logo.png" />
+
+    <!-- PWA (optional; ensure /manifest.json exists) -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "immofy",
+            "url": "https://immofy.org/",
+            "logo": "https://immofy.org/logo.png"
+          },
+          {
+            "@type": "WebSite",
+            "name": "immofy",
+            "url": "https://immofy.org/",
+            "inLanguage": "en",
+            "description": "immofy helps landlords find suitable tenants quickly and fairly with organized workflows and privacy‑conscious tools.",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://immofy.org/?search={search_term_string}&sort=newest",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "WebApplication",
+            "name": "immofy – tenant selection & application management",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web",
+            "url": "https://immofy.org/",
+            "image": "https://immofy.org/logo.png",
+            "description": "Application management, communication, and fair screening tools to help landlords select the right tenants. Includes optional AI‑assistance."
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
