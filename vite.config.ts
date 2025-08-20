@@ -54,4 +54,17 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ['lucide-react']
+  },
+  build: {
+    rollupOptions: {
+      external: [],
+      output: {
+        manualChunks: {
+          'lucide': ['lucide-react']
+        }
+      }
+    }
+  }
 });

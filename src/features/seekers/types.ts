@@ -3,6 +3,7 @@ export interface Seeker {
   name: string;
   headline?: string;
   avatarUrl?: string;
+  images?: string[];
   budgetMin?: number;
   budgetMax?: number;
   locations: string[];

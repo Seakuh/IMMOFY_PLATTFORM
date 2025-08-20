@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Edit, Trash2, Eye, Heart, MoreHorizontal } from 'lucide-react'
+import { Edit, Trash2, Eye, Heart, MoreHorizontal, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Property } from '@/features/properties/types'
 import { cn } from '@/lib/utils'
 
@@ -18,6 +18,7 @@ export default function PropertyCard({
 }: PropertyCardProps) {
   const [imageError, setImageError] = useState(false)
   const [showActions, setShowActions] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -42,12 +43,24 @@ export default function PropertyCard({
     onToggleStatus?.(property.id)
   }
 
+  const nextImage = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => (prev + 1) % Math.max(property.images.length, 1))
+  }
+
+  const previousImage = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => (prev - 1 + Math.max(property.images.length, 1)) % Math.max(property.images.length, 1))
+  }
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-200 ease-in-out group">
       <div className="relative">
         {!imageError && property.images.length > 0 ? (
           <img
-            src={property.images[0]}
+            src={property.images[currentImageIndex]}
             alt={property.title}
             className="w-full h-48 object-cover"
             onError={() => setImageError(true)}
@@ -58,6 +71,30 @@ export default function PropertyCard({
             alt="Property"
             className="w-full h-48 object-cover"
           />
+        )}
+
+        {/* Navigation Arrows - Only visible on hover and if multiple images */}
+        {property.images.length > 1 && (
+          <>
+            <button
+              onClick={previousImage}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+            >
+              <ChevronLeft className="w-4 h-4 text-gray-800" />
+            </button>
+            
+            <button
+              onClick={nextImage}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+            >
+              <ChevronRight className="w-4 h-4 text-gray-800" />
+            </button>
+
+            {/* Image counter */}
+            <div className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
+              {currentImageIndex + 1} / {property.images.length}
+            </div>
+          </>
         )}
         
         {/* Status Badge */}

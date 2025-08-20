@@ -1,7 +1,7 @@
 import { useFavoritesStore } from "@/features/favorites/store";
 import { Seeker } from "@/features/seekers/types";
 import { cn, formatBudget, formatDate } from "@/lib/utils";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ContactDialog from "./ContactDialog";
@@ -14,8 +14,11 @@ export default function SeekerCard({ seeker }: SeekerCardProps) {
   const { favorites, toggleFavorite } = useFavoritesStore();
   const [imageError, setImageError] = useState(false);
   const [showContactDialog, setShowContactDialog] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const isFavorited = favorites.includes(seeker.id);
   const navigate = useNavigate();
+  
+  const images = seeker.images && seeker.images.length > 0 ? seeker.images : seeker.avatarUrl ? [seeker.avatarUrl] : [];
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -29,6 +32,18 @@ export default function SeekerCard({ seeker }: SeekerCardProps) {
     setShowContactDialog(true);
   };
 
+  const nextImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev + 1) % Math.max(images.length, 1));
+  };
+
+  const previousImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev - 1 + Math.max(images.length, 1)) % Math.max(images.length, 1));
+  };
+
   return (
     <>
       <div
@@ -36,9 +51,9 @@ export default function SeekerCard({ seeker }: SeekerCardProps) {
         className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-200 ease-in-out cursor-pointer group"
       >
         <div className="relative">
-          {!imageError && seeker.avatarUrl ? (
+          {!imageError && images.length > 0 ? (
             <img
-              src={seeker.avatarUrl}
+              src={images[currentImageIndex]}
               alt={seeker.name}
               className="w-full h-48 object-cover"
               onError={() => setImageError(true)}
@@ -49,6 +64,30 @@ export default function SeekerCard({ seeker }: SeekerCardProps) {
               alt="Anonymous"
               className="w-full h-48 object-cover"
             />
+          )}
+
+          {/* Navigation Arrows - Only visible on hover and if multiple images */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={previousImage}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+              >
+                <ChevronLeft className="w-4 h-4 text-gray-800" />
+              </button>
+              
+              <button
+                onClick={nextImage}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+              >
+                <ChevronRight className="w-4 h-4 text-gray-800" />
+              </button>
+
+              {/* Image counter */}
+              <div className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
+                {currentImageIndex + 1} / {images.length}
+              </div>
+            </>
           )}
 
           <button

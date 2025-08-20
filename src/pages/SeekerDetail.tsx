@@ -1,5 +1,6 @@
 import Loader from "@/components/Loader";
 import SeekerCard from "@/components/SeekerCard";
+import ImageGallery from "@/components/ImageGallery";
 import { useFavoritesStore, useHistoryStore } from "@/features/favorites/store";
 import { useSeeker, useSimilarSeekers } from "@/features/seekers/hooks";
 import { cn, formatBudget, formatDate } from "@/lib/utils";
@@ -13,12 +14,11 @@ import {
   MapPin,
   Phone,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 
 export default function SeekerDetail() {
   const { id } = useParams<{ id: string }>();
-  const [imageError, setImageError] = useState(false);
 
   const { seeker, loading, error } = useSeeker(id!);
   const { seekers: similarSeekers, loading: similarLoading } =
@@ -102,24 +102,11 @@ export default function SeekerDetail() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="relative">
-          {!imageError && seeker.avatarUrl ? (
-            <img
-              src={seeker.avatarUrl}
-              alt={seeker.name}
-              className="w-full h-64 md:h-80 object-cover"
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            <div className="w-full h-64 md:h-80 bg-gray-200 flex items-center justify-center">
-              <div className="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-gray-500 text-3xl font-semibold">
-                  {seeker.name.charAt(0).toUpperCase()}
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
+        <ImageGallery
+          images={seeker.images && seeker.images.length > 0 ? seeker.images : seeker.avatarUrl ? [seeker.avatarUrl] : []}
+          alt={seeker.name}
+          className="w-full h-64 md:h-80"
+        />
 
         <div className="p-6">
           <div className="mb-6">
