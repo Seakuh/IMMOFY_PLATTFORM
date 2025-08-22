@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { X, Send, StickyNote, MessageSquare } from 'lucide-react'
 import { Seeker } from '@/features/seekers/types'
 import { useContactsStore } from '@/features/contacts/store'
+import { useMessagesStore } from '@/features/messages/store'
 import { formatDate } from '@/lib/utils'
 
 interface ContactDialogProps {
@@ -14,9 +15,11 @@ export default function ContactDialog({ seeker, isOpen, onClose }: ContactDialog
   const [message, setMessage] = useState('')
   const [note, setNote] = useState('')
   const [activeTab, setActiveTab] = useState<'messages' | 'notes'>('messages')
+  const [sendingMessage, setSendingMessage] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   
   const { getThread, addMessage, addNote, logAction } = useContactsStore()
+  const { sendNewMessage } = useMessagesStore()
   const thread = getThread(seeker.id)
 
   useEffect(() => {
@@ -47,11 +50,29 @@ export default function ContactDialog({ seeker, isOpen, onClose }: ContactDialog
     }
   }, [isOpen])
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      console.log(`Message sent to ${seeker.name || 'Unknown'} (ID: ${seeker.id}): ${message.trim()}`);
-      addMessage(seeker.id, message.trim())
-      setMessage('')
+  const handleSendMessage = async () => {
+    if (message.trim() && !sendingMessage) {
+      setSendingMessage(true)
+      try {
+        // Send via API
+        await sendNewMessage({
+          recipientId: seeker.id,
+          content: message.trim()
+        })
+        
+        // Also log locally for immediate UI update
+        addMessage(seeker.id, message.trim())
+        setMessage('')
+        
+        console.log(`Message sent to ${seeker.name || 'Unknown'} (ID: ${seeker.id}): ${message.trim()}`);
+      } catch (error) {
+        console.error('Failed to send message:', error)
+        // Still add locally if API fails for better UX
+        addMessage(seeker.id, message.trim())
+        setMessage('')
+      } finally {
+        setSendingMessage(false)
+      }
     }
   }
 
@@ -191,10 +212,14 @@ export default function ContactDialog({ seeker, isOpen, onClose }: ContactDialog
                   />
                   <button
                     onClick={handleSendMessage}
-                    disabled={!message.trim()}
+                    disabled={!message.trim() || sendingMessage}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    <Send size={16} />
+                    {sendingMessage ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Send size={16} />
+                    )}
                   </button>
                 </div>
               </div>

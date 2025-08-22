@@ -1,7 +1,9 @@
 import { cn } from "@/lib/utils";
-import { Clock, Heart, Home, Search, User, X, Zap } from "lucide-react";
+import { Clock, Heart, Home, MessageCircle, Search, User, X, Zap } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useMessagesStore } from "@/features/messages/store";
+import NotificationBadge from "./NotificationBadge";
 
 interface DrawerProps {
   isOpen: boolean;
@@ -12,6 +14,7 @@ const menuItems = [
   { id: "home", label: "Home", icon: Home, path: "/" },
   { id: "explore", label: "Explore", icon: Search, path: "/explore" },
   { id: "swipe", label: "Swipe Mode", icon: Zap, path: "/swipe" },
+  { id: "messages", label: "Nachrichten", icon: MessageCircle, path: "/messages" },
   { id: "faves", label: "Favoriten", icon: Heart, path: "/faves" },
   { id: "account", label: "Account", icon: User, path: "/account" },
   { id: "history", label: "Verlauf", icon: Clock, path: "/history" },
@@ -19,10 +22,13 @@ const menuItems = [
 
 export default function Drawer({ isOpen, onClose }: DrawerProps) {
   const location = useLocation();
+  const { unreadCount, fetchUnreadCount } = useMessagesStore();
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      // Fetch unread count when drawer opens
+      fetchUnreadCount();
     } else {
       document.body.style.overflow = "unset";
     }
@@ -30,7 +36,7 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, fetchUnreadCount]);
 
   if (!isOpen) return null;
 
@@ -65,6 +71,7 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
+            const isMessages = item.id === "messages";
 
             return (
               <Link
@@ -72,13 +79,18 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
                 to={item.path}
                 onClick={onClose}
                 className={cn(
-                  "flex items-center px-6 py-3 text-base font-medium transition-colors",
+                  "flex items-center px-6 py-3 text-base font-medium transition-colors relative",
                   isActive
                     ? "text-blue-600 bg-blue-50 border-r-2 border-blue-600"
                     : "text-gray-700 hover:bg-gray-50"
                 )}
               >
-                <Icon size={20} className="mr-4" />
+                <div className="relative mr-4">
+                  <Icon size={20} />
+                  {isMessages && unreadCount > 0 && (
+                    <NotificationBadge count={unreadCount} className="top-[-8px] right-[-8px]" />
+                  )}
+                </div>
                 {item.label}
               </Link>
             );
