@@ -1,70 +1,108 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { Seeker, SearchFilters } from './types'
+import { mockSeekers } from './mockData'
 
-interface FavoritesState {
-  favorites: string[]
-  toggleFavorite: (seekerId: string) => void
-  addFavorite: (seekerId: string) => void
-  removeFavorite: (seekerId: string) => void
-  clearFavorites: () => void
+interface SeekersState {
+  seekers: Seeker[]
+  isLoading: boolean
+  error: string | null
+  filters: SearchFilters
+  fetchSeekers: (filters?: SearchFilters) => Promise<void>
+  setFilters: (filters: SearchFilters) => void
+  getSeeker: (id: string) => Seeker | undefined
 }
 
-interface HistoryState {
-  history: Array<{ seekerId: string; viewedAt: string }>
-  addToHistory: (seekerId: string) => void
-  clearHistory: () => void
-}
-
-export const useFavoritesStore = create<FavoritesState>()(
-  persist(
-    (set, get) => ({
-      favorites: [],
-      toggleFavorite: (seekerId: string) => {
-        const { favorites } = get()
-        if (favorites.includes(seekerId)) {
-          set({ favorites: favorites.filter(id => id !== seekerId) })
-        } else {
-          set({ favorites: [...favorites, seekerId] })
-        }
-      },
-      addFavorite: (seekerId: string) => {
-        const { favorites } = get()
-        if (!favorites.includes(seekerId)) {
-          set({ favorites: [...favorites, seekerId] })
-        }
-      },
-      removeFavorite: (seekerId: string) => {
-        set({ favorites: get().favorites.filter(id => id !== seekerId) })
-      },
-      clearFavorites: () => set({ favorites: [] }),
-    }),
-    {
-      name: 'immofy-favorites',
+export const useSeekersStore = create<SeekersState>((set, get) => ({
+  seekers: [],
+  isLoading: false,
+  error: null,
+  filters: {},
+  
+  fetchSeekers: async (filters?: SearchFilters) => {
+    set({ isLoading: true, error: null })
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      let filteredSeekers = [...mockSeekers]
+      
+      if (filters?.search) {
+        const searchLower = filters.search.toLowerCase()
+        filteredSeekers = filteredSeekers.filter(seeker =>
+          seeker.name?.toLowerCase().includes(searchLower) ||
+          seeker.headline?.toLowerCase().includes(searchLower) ||
+          seeker.locations.some(loc => loc.toLowerCase().includes(searchLower)) ||
+          seeker.tags?.some(tag => tag.toLowerCase().includes(searchLower)) ||
+          seeker.bio?.toLowerCase().includes(searchLower)
+        )
+      }
+      
+      if (filters?.locations && filters.locations.length > 0) {
+        filteredSeekers = filteredSeekers.filter(seeker =>
+          seeker.locations.some(loc => filters.locations!.includes(loc))
+        )
+      }
+      
+      if (filters?.budgetMin) {
+        filteredSeekers = filteredSeekers.filter(seeker =>
+          !seeker.budgetMax || seeker.budgetMax >= filters.budgetMin!
+        )
+      }
+      
+      if (filters?.budgetMax) {
+        filteredSeekers = filteredSeekers.filter(seeker =>
+          !seeker.budgetMin || seeker.budgetMin <= filters.budgetMax!
+        )
+      }
+      
+      if (filters?.roomsMin) {
+        filteredSeekers = filteredSeekers.filter(seeker =>
+          !seeker.roomsMin || seeker.roomsMin >= filters.roomsMin!
+        )
+      }
+      
+      if (filters?.pets !== undefined) {
+        filteredSeekers = filteredSeekers.filter(seeker =>
+          seeker.pets === filters.pets
+        )
+      }
+      
+      // Sort seekers
+      switch (filters?.sort) {
+        case 'budget_asc':
+          filteredSeekers.sort((a, b) => (a.budgetMin || 0) - (b.budgetMin || 0))
+          break
+        case 'budget_desc':
+          filteredSeekers.sort((a, b) => (b.budgetMax || 0) - (a.budgetMax || 0))
+          break
+        case 'newest':
+        default:
+          filteredSeekers.sort((a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
+          break
+      }
+      
+      set({ 
+        seekers: filteredSeekers, 
+        isLoading: false,
+        filters: filters || {}
+      })
+    } catch (error) {
+      set({ 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        isLoading: false
+      })
     }
-  )
-)
-
-export const useHistoryStore = create<HistoryState>()(
-  persist(
-    (set, get) => ({
-      history: [],
-      addToHistory: (seekerId: string) => {
-        const { history } = get()
-        const existingIndex = history.findIndex(item => item.seekerId === seekerId)
-        const newItem = { seekerId, viewedAt: new Date().toISOString() }
-        
-        if (existingIndex >= 0) {
-          const updatedHistory = [...history]
-          updatedHistory[existingIndex] = newItem
-          set({ history: updatedHistory })
-        } else {
-          set({ history: [newItem, ...history.slice(0, 49)] })
-        }
-      },
-      clearHistory: () => set({ history: [] }),
-    }),
-    {
-      name: 'immofy-history',
-    }
-  )
-)
+  },
+  
+  setFilters: (filters: SearchFilters) => {
+    set({ filters })
+    get().fetchSeekers(filters)
+  },
+  
+  getSeeker: (id: string) => {
+    return get().seekers.find(seeker => seeker.id === id)
+  }
+}))

@@ -4,6 +4,7 @@ import {
   getProperties, 
   getProperty, 
   createProperty, 
+  createPropertyWithImages,
   updateProperty, 
   deleteProperty,
   PropertyFilters,
@@ -65,12 +66,15 @@ export function useProperty(id: string) {
 export function useCreateProperty() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
 
   const create = async (data: PropertyFormData): Promise<Property | null> => {
     try {
       setLoading(true)
       setError(null)
+      setSuccess(false)
       const result = await createProperty(data)
+      setSuccess(true)
       return result
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create property')
@@ -80,7 +84,42 @@ export function useCreateProperty() {
     }
   }
 
-  return { create, loading, error }
+  const createWithImages = async (
+    propertyData: PropertyFormData, 
+    images: File[]
+  ): Promise<Property | null> => {
+    try {
+      setLoading(true)
+      setError(null)
+      setSuccess(false)
+      const result = await createPropertyWithImages(propertyData, images)
+      setSuccess(true)
+      return result
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create property with images')
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const reset = () => {
+    setLoading(false)
+    setError(null)
+    setSuccess(false)
+  }
+
+  return { 
+    create, 
+    createWithImages, 
+    loading, 
+    error, 
+    success,
+    reset,
+    isLoading: loading,
+    isError: !!error,
+    isSuccess: success
+  }
 }
 
 export function useUpdateProperty() {

@@ -6,6 +6,7 @@ import Faves from './pages/Faves'
 import Account from './pages/Account'
 import History from './pages/History'
 import SeekerDetail from './pages/SeekerDetail'
+import SwipeMode from './pages/SwipeMode'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/explore" element={<Explore />} />
+        <Route path="/swipe" element={<SwipeMode />} />
         <Route path="/faves" element={<Faves />} />
         <Route path="/account" element={<Account />} />
         <Route path="/history" element={<History />} />

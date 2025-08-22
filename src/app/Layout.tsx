@@ -3,7 +3,7 @@ import Drawer from "@/components/Drawer";
 import NavTabs from "@/components/NavTabs";
 import NavTop from "@/components/NavTop";
 import { logButtonClicked } from "@/lib/logger";
-import { Plus } from "lucide-react";
+import { Search } from "lucide-react";
 import { ReactNode, useState } from "react";
 
 interface LayoutProps {
@@ -19,17 +19,21 @@ export default function Layout({ children }: LayoutProps) {
     images: File[];
     email: string;
   }) => {
-    // Das Logging passiert bereits in der CreatePropertyOnboarding Komponente
-
-    // Hier würdest du die Daten verarbeiten oder an ein Backend senden
-    // Beispiel:
-    // await createPropertyFromOnboarding(data)
-
-    console.log("🎯 Verarbeitung der Onboarding-Daten im Layout:", {
+    // Das eigentliche Senden passiert bereits in der CreatePropertyOnboarding Komponente
+    // Hier können wir zusätzliche Client-seitige Aktionen ausführen
+    
+    console.log("🎯 Wohnungsgesuch im Layout abgeschlossen:", {
       prompt: `"${data.prompt.slice(0, 100)}..."`,
       imageCount: data.images.length,
       email: data.email,
+      timestamp: new Date().toISOString()
     });
+    
+    // Hier könnten wir z.B.:
+    // - Analytics Events senden
+    // - Lokale Daten aktualisieren 
+    // - Navigation zu einer Bestätigungsseite
+    // - Toast-Nachrichten anzeigen
   };
 
   return (
@@ -43,13 +47,13 @@ export default function Layout({ children }: LayoutProps) {
       {/* Floating Action Button */}
       <button
         onClick={() => {
-          logButtonClicked("fab_create_property", "main_layout");
+          logButtonClicked("fab_create_housing_request", "main_layout");
           setIsOnboardingOpen(true);
         }}
         className="fixed bottom-24 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 hover:scale-105 transition-all duration-200 flex items-center justify-center z-40"
-        aria-label="Inserat erstellen"
+        aria-label="Wohnungsgesuch erstellen"
       >
-        <Plus className="w-6 h-6" />
+        <Search className="w-6 h-6" />
       </button>
 
       <NavTabs />

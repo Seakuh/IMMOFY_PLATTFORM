@@ -1,8 +1,9 @@
-import { Camera, Euro, Home, MapPin, Plus, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { Camera, Euro, Home, MapPin, Plus, X, Loader, AlertCircle, Check, Upload } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
 import { uploadPropertyImages } from "../features/properties/api";
 import { useCreateProperty } from "../features/properties/hooks";
 import { PropertyFormData } from "../features/properties/types";
+import { logButtonClicked } from "@/lib/logger";
 
 interface CreatePropertyDialogProps {
   isOpen: boolean;
@@ -28,16 +29,63 @@ export default function CreatePropertyDialog({
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [newFeature, setNewFeature] = useState("");
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { create, loading, error } = useCreateProperty();
+  const { createWithImages, loading, error, success, reset, isLoading, isError, isSuccess } = useCreateProperty();
+
+  // Auto-close nach erfolgreichem Submit
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => {
+        handleClose();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setImages((prev) => [...prev, ...files]);
+    processFiles(files);
+  };
 
-    const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
+  const processFiles = (files: File[]) => {
+    // Filter nur Bild-Dateien
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    if (imageFiles.length === 0) return;
+
+    setImages((prev) => [...prev, ...imageFiles]);
+    const newPreviewUrls = imageFiles.map((file) => URL.createObjectURL(file));
     setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
+  };
+
+  // Drag & Drop Handlers
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    processFiles(files);
   };
 
   const removeImage = (index: number) => {
@@ -65,18 +113,31 @@ export default function CreatePropertyDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    logButtonClicked('create_property_submit', 'property_dialog');
+    setSubmitStatus('submitting');
 
     try {
-      const property = await create(formData);
-      if (property && images.length > 0) {
-        await uploadPropertyImages(property.id, images);
-      }
+      console.log('🏠 Erstelle Inserat mit Daten:', {
+        ...formData,
+        imageCount: images.length
+      });
 
-      onSuccess?.(property);
-      onClose();
-      resetForm();
+      // Verwende die neue createWithImages API
+      const property = await createWithImages(formData, images);
+
+      if (property) {
+        setSubmitStatus('success');
+        console.log('✅ Inserat erfolgreich erstellt:', property);
+        onSuccess?.(property);
+        
+        // Dialog wird automatisch nach 2s geschlossen (useEffect)
+      } else {
+        throw new Error('Inserat konnte nicht erstellt werden');
+      }
     } catch (err) {
-      console.error("Failed to create property:", err);
+      setSubmitStatus('error');
+      console.error("❌ Fehler beim Erstellen des Inserats:", err);
     }
   };
 
@@ -95,6 +156,14 @@ export default function CreatePropertyDialog({
     previewUrls.forEach((url) => URL.revokeObjectURL(url));
     setPreviewUrls([]);
     setNewFeature("");
+    setSubmitStatus('idle');
+    reset(); // Reset hook state
+  };
+
+  const handleClose = () => {
+    logButtonClicked('create_property_close', 'property_dialog');
+    resetForm();
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -104,12 +173,24 @@ export default function CreatePropertyDialog({
       <div className="bg-white rounded-[20px] w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Neues Inserat erstellen
-          </h2>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Neues Inserat erstellen
+            </h2>
+            {isLoading && (
+              <p className="text-sm text-blue-600 mt-1">Wird gespeichert...</p>
+            )}
+            {isSuccess && (
+              <p className="text-sm text-green-600 mt-1">✓ Erfolgreich erstellt!</p>
+            )}
+            {isError && (
+              <p className="text-sm text-red-600 mt-1">Fehler beim Speichern</p>
+            )}
+          </div>
           <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+            onClick={handleClose}
+            disabled={isLoading}
+            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
             <X className="w-4 h-4 text-gray-600" />
           </button>
@@ -254,16 +335,36 @@ export default function CreatePropertyDialog({
                 Bilder
               </label>
               <div className="space-y-4">
-                <button
-                  type="button"
+                {/* Drag & Drop Upload Area */}
+                <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-32 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center hover:border-gray-400 transition-colors"
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  className={`w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer group ${
+                    isDragOver
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                  }`}
                 >
-                  <Camera className="w-8 h-8 text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-500">
-                    Bilder hinzufügen
-                  </span>
-                </button>
+                  {isDragOver ? (
+                    <>
+                      <Upload className="w-8 h-8 text-blue-500 mb-2 animate-bounce" />
+                      <span className="text-sm text-blue-600 font-medium">
+                        Bilder hier ablegen
+                      </span>
+                      <span className="text-xs text-blue-400 mt-1">Loslassen zum Hochladen</span>
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="w-8 h-8 text-gray-400 group-hover:text-gray-600 mb-2 transition-colors" />
+                      <span className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">
+                        Bilder auswählen oder hierher ziehen
+                      </span>
+                    </>
+                  )}
+                </div>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -344,9 +445,34 @@ export default function CreatePropertyDialog({
               </div>
             </div>
 
-            {error && (
+            {/* Status Messages */}
+            {isError && (
               <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                <p className="text-red-600 text-sm">{error}</p>
+                <div className="flex items-start space-x-3">
+                  <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-red-800 font-medium text-sm">Fehler beim Erstellen des Inserats</p>
+                    <p className="text-red-600 text-sm mt-1">{error}</p>
+                    <button
+                      onClick={() => reset()}
+                      className="text-red-600 hover:text-red-700 text-sm underline mt-2"
+                    >
+                      Erneut versuchen
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {isSuccess && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5 text-green-500" />
+                  <div>
+                    <p className="text-green-800 font-medium text-sm">Inserat erfolgreich erstellt!</p>
+                    <p className="text-green-600 text-sm mt-1">Das Fenster schließt sich automatisch...</p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -356,18 +482,39 @@ export default function CreatePropertyDialog({
             <div className="flex gap-3">
               <button
                 type="button"
-                onClick={onClose}
-                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                onClick={handleClose}
+                disabled={isLoading}
+                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Abbrechen
+                {isSuccess ? "Schließen" : "Abbrechen"}
               </button>
               <button
                 type="submit"
-                disabled={loading || !formData.title || !formData.location}
-                className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                disabled={isLoading || !formData.title || !formData.location || isSuccess}
+                className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
               >
-                {loading ? "Erstelle..." : "Inserat erstellen"}
+                {isLoading ? (
+                  <>
+                    <Loader className="w-4 h-4 mr-2 animate-spin" />
+                    Erstelle...
+                  </>
+                ) : isSuccess ? (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    Erstellt!
+                  </>
+                ) : (
+                  "Inserat erstellen"
+                )}
               </button>
+            </div>
+            
+            {/* Additional Info */}
+            <div className="mt-3 text-center">
+              <p className="text-xs text-gray-500">
+                {images.length > 0 && `${images.length} Bild${images.length === 1 ? '' : 'er'} zum Hochladen bereit • `}
+                Alle Daten werden sicher übertragen
+              </p>
             </div>
           </div>
         </form>

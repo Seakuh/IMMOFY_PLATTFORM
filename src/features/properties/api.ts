@@ -53,6 +53,43 @@ export async function createProperty(
   });
 }
 
+// Neue Funktion: Property mit Bildern in einem Schritt erstellen
+export async function createPropertyWithImages(
+  propertyData: PropertyFormData,
+  images: File[]
+): Promise<Property> {
+  const formData = new FormData()
+  
+  // Property-Daten als JSON hinzufügen
+  formData.append('propertyData', JSON.stringify(propertyData))
+  
+  // Bilder hinzufügen
+  images.forEach((file, index) => {
+    formData.append('images', file)
+  })
+  
+  // Metadata hinzufügen
+  formData.append('metadata', JSON.stringify({
+    userAgent: navigator.userAgent,
+    timestamp: new Date().toISOString(),
+    imageCount: images.length
+  }))
+
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+  
+  const response = await fetch(`${baseUrl}/properties/create-with-images`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`)
+  }
+
+  return response.json()
+}
+
 export async function updateProperty(
   id: string,
   data: Partial<PropertyFormData>

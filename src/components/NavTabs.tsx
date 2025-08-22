@@ -1,13 +1,13 @@
 import { cn } from "@/lib/utils";
-import { Clock, Heart, Home, Search, User } from "lucide-react";
+import { Heart, Home, Search, User, Zap } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const tabs = [
   { id: "home", label: "Home", icon: Home, path: "/" },
   { id: "explore", label: "Explore", icon: Search, path: "/explore" },
+  { id: "swipe", label: "Swipe", icon: Zap, path: "/swipe" },
   { id: "faves", label: "Favoriten", icon: Heart, path: "/faves" },
   { id: "account", label: "Account", icon: User, path: "/account" },
-  { id: "history", label: "Verlauf", icon: Clock, path: "/history" },
 ];
 
 export default function NavTabs() {
