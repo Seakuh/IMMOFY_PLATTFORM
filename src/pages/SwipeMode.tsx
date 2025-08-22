@@ -1,23 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useSeekersStore } from '@/features/seekers/store';
+import { useSwipeStore } from '@/features/swipe/store';
 import { Seeker } from '@/features/seekers/types';
 import SwipeMode from '@/components/SwipeMode';
 import Loader from '@/components/Loader';
 
 export default function SwipeModePage() {
   const { seekers, isLoading, error, fetchSeekers } = useSeekersStore();
+  const { hasSwipedSeeker, fetchHistory } = useSwipeStore();
   const [availableSeekers, setAvailableSeekers] = useState<Seeker[]>([]);
 
   useEffect(() => {
     if (seekers.length === 0) {
       fetchSeekers();
     }
-  }, [seekers.length, fetchSeekers]);
+    // Load swipe history
+    fetchHistory();
+  }, [seekers.length, fetchSeekers, fetchHistory]);
 
   useEffect(() => {
-    // Filter out seekers that have already been swiped (you can extend this logic)
-    setAvailableSeekers(seekers);
-  }, [seekers]);
+    // Filter out seekers that have already been swiped
+    const unswipedSeekers = seekers.filter(seeker => !hasSwipedSeeker(seeker.id));
+    setAvailableSeekers(unswipedSeekers);
+  }, [seekers, hasSwipedSeeker]);
 
   const handleSwipeLeft = (seeker: Seeker) => {
     console.log('Swiped left on:', seeker.name);

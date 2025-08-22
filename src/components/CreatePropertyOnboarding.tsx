@@ -16,11 +16,13 @@ import {
   Mail,
   MessageSquare,
   Sparkles,
+  User,
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface OnboardingData {
+  name?: string;
   prompt: string;
   images: File[];
   email: string;
@@ -32,7 +34,7 @@ interface CreatePropertyOnboardingProps {
   onComplete?: (data: OnboardingData) => void;
 }
 
-type Step = "welcome" | "prompt" | "images" | "email" | "complete";
+type Step = "welcome" | "name" | "prompt" | "images" | "email" | "complete";
 
 export default function CreatePropertyOnboarding({
   isOpen,
@@ -41,6 +43,7 @@ export default function CreatePropertyOnboarding({
 }: CreatePropertyOnboardingProps) {
   const [currentStep, setCurrentStep] = useState<Step>("welcome");
   const [formData, setFormData] = useState<OnboardingData>({
+    name: "",
     prompt: "",
     images: [],
     email: "",
@@ -61,7 +64,7 @@ export default function CreatePropertyOnboarding({
     reset,
   } = useOnboardingSubmission();
 
-  const steps: Step[] = ["welcome", "prompt", "images", "email", "complete"];
+  const steps: Step[] = ["welcome", "name", "prompt", "images", "email", "complete"];
   const currentStepIndex = steps.indexOf(currentStep);
   const progress = ((currentStepIndex + 1) / steps.length) * 100;
 
@@ -219,6 +222,7 @@ export default function CreatePropertyOnboarding({
     setPreviewUrls([]);
     setCurrentStep("welcome");
     setFormData({
+      name: "",
       prompt: "",
       images: [],
       email: "",
@@ -231,6 +235,8 @@ export default function CreatePropertyOnboarding({
     switch (currentStep) {
       case "welcome":
         return true;
+      case "name":
+        return true; // Name ist optional
       case "prompt":
         return formData.prompt.trim().length > 0;
       case "images":
@@ -294,6 +300,42 @@ export default function CreatePropertyOnboarding({
               <div className="bg-blue-50 rounded-xl p-4">
                 <p className="text-sm text-blue-800">
                   ✨ Es dauert nur wenige Minuten
+                </p>
+              </div>
+            </div>
+          )}
+
+          {currentStep === "name" && (
+            <div className="py-4">
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <User className="w-6 h-6 text-indigo-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  Wie sollen wir dich nennen?
+                </h3>
+                <p className="text-gray-600">
+                  Dein Name hilft Vermietern, dich persönlich anzusprechen. Du kannst auch einen Spitznamen verwenden.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Dein Name (optional)
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={formData.name || ""}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="z.B. Max, Anna, oder wie du genannt werden möchtest"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  Tipp: Ein Name macht dein Gesuch persönlicher und sympathischer.
                 </p>
               </div>
             </div>

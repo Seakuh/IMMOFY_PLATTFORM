@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useFavoritesStore } from '@/features/favorites/store';
+import { useSwipeStore } from '@/features/swipe/store';
 import { Seeker } from '@/features/seekers/types';
 import { cn, formatBudget, formatDate } from '@/lib/utils';
 import { ChevronLeft, ChevronRight, X, Heart, MessageSquare } from 'lucide-react';
@@ -22,6 +23,7 @@ export default function SwipeMode({ seekers, onSwipeLeft, onSwipeRight }: SwipeM
   
   const cardRef = useRef<HTMLDivElement>(null);
   const { addFavorite } = useFavoritesStore();
+  const { recordSwipe } = useSwipeStore();
   
   const currentSeeker = seekers[currentIndex];
   
@@ -43,18 +45,29 @@ export default function SwipeMode({ seekers, onSwipeLeft, onSwipeRight }: SwipeM
     setImageError(false);
   }, [currentIndex]);
   
-  const handleLike = () => {
+  const handleLike = async () => {
     if (currentSeeker) {
-      addFavorite(currentSeeker.id);
-      onSwipeRight?.(currentSeeker);
-      nextSeeker();
+      // Record swipe action via API
+      const success = await recordSwipe(currentSeeker.id, 'like');
+      
+      if (success) {
+        // Also add to favorites store for immediate UI update
+        addFavorite(currentSeeker.id);
+        onSwipeRight?.(currentSeeker);
+        nextSeeker();
+      }
     }
   };
   
-  const handleReject = () => {
+  const handleReject = async () => {
     if (currentSeeker) {
-      onSwipeLeft?.(currentSeeker);
-      nextSeeker();
+      // Record swipe action via API
+      const success = await recordSwipe(currentSeeker.id, 'pass');
+      
+      if (success) {
+        onSwipeLeft?.(currentSeeker);
+        nextSeeker();
+      }
     }
   };
   
@@ -164,7 +177,7 @@ export default function SwipeMode({ seekers, onSwipeLeft, onSwipeRight }: SwipeM
   const opacity = isDragging ? Math.max(0.7, 1 - Math.abs(dragOffset) * 0.002) : 1;
   
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 w-full max-w-full">
       {/* Card Stack */}
       <div className="relative w-full max-w-sm mb-8">
         {/* Next card preview */}
