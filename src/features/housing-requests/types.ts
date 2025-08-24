@@ -1,17 +1,31 @@
 export interface HousingRequest {
   id: string
-  title: string
-  description: string
+  prompt: string
   email: string
+  metadata?: {
+    userAgent: string
+    timestamp: string
+    sessionId?: string
+  }
+  filteredData?: any
+  generatedDescription: string
+  uploadedImages?: string[]
+  vector?: number[]
+  status: string
+  isPublished: boolean
+  createdAt: string
+  updatedAt: string
+  
+  // Legacy fields for backwards compatibility
+  title?: string
+  description?: string
   images?: string[]
-  // Wohnungssuche spezifische Felder
   maxBudget?: number
   minRooms?: number
   maxRooms?: number
   minSize?: number
-  preferredLocations: string[]
+  preferredLocations?: string[]
   moveInDate?: string
-  // Persönliche Informationen
   profileInfo?: {
     age?: number
     profession?: string
@@ -19,12 +33,9 @@ export interface HousingRequest {
     smoking?: boolean
     references?: boolean
   }
-  // System Felder
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-  views: number
-  contactRequests: number
+  isActive?: boolean
+  views?: number
+  contactRequests?: number
 }
 
 export interface HousingRequestFormData {

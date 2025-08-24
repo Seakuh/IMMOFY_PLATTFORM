@@ -104,11 +104,27 @@ export async function deleteHousingRequest(id: string): Promise<void> {
   });
 }
 
+export interface HomepageData {
+  latest: HousingRequest[];
+  featured: HousingRequest[];
+  stats: {
+    totalRequests: number;
+    activeRequests: number;
+    recentRequests: number;
+  };
+}
+
+// Homepage-Daten abrufen
+export async function getHomepageData(): Promise<HomepageData> {
+  return apiRequest<HomepageData>('/housing-requests/homepage');
+}
+
 // Ähnliche Wohnungsgesuche finden
 export async function getSimilarHousingRequests(
-  id: string
+  id: string,
+  limit: number = 5
 ): Promise<HousingRequest[]> {
-  return apiRequest<HousingRequest[]>(`/housing-requests/similar/${id}`);
+  return apiRequest<HousingRequest[]>(`/housing-requests/${id}/similar?limit=${limit}`);
 }
 
 // Kontakt zu einem Wohnungssuchenden aufnehmen (für Vermieter)

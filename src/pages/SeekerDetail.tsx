@@ -1,8 +1,10 @@
 import Loader from "@/components/Loader";
 import SeekerCard from "@/components/SeekerCard";
+import HousingRequestCard from "@/components/HousingRequestCard";
 import ImageGallery from "@/components/ImageGallery";
 import { useFavoritesStore, useHistoryStore } from "@/features/favorites/store";
 import { useSeeker, useSimilarSeekers } from "@/features/seekers/hooks";
+import { useSimilarHousingRequests } from "@/features/housing-requests/hooks";
 import { cn, formatBudget, formatDate } from "@/lib/utils";
 import {
   ArrowLeft,
@@ -23,6 +25,8 @@ export default function SeekerDetail() {
   const { seeker, loading, error } = useSeeker(id!);
   const { seekers: similarSeekers, loading: similarLoading } =
     useSimilarSeekers(id!);
+  const { housingRequests: similarHousingRequests, loading: similarHousingLoading } =
+    useSimilarHousingRequests(id!);
   const { addToHistory } = useHistoryStore();
   const { favorites, toggleFavorite } = useFavoritesStore();
 
@@ -217,6 +221,26 @@ export default function SeekerDetail() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {similarSeekers.map((seeker) => (
                 <SeekerCard key={seeker.id} seeker={seeker} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {similarHousingRequests.length > 0 && (
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
+            Ähnliche Wohnungsgesuche
+          </h2>
+
+          {similarHousingLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {similarHousingRequests.map((housingRequest) => (
+                <HousingRequestCard key={housingRequest.id} housingRequest={housingRequest} />
               ))}
             </div>
           )}
