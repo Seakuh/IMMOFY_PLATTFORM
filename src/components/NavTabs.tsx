@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Heart, Home, MessageCircle, Search, User, Zap } from "lucide-react";
+import { Heart, Home, MessageCircle, PinIcon, User, Zap } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { useMessagesStore } from "@/features/messages/store";
@@ -7,7 +7,7 @@ import NotificationBadge from "./NotificationBadge";
 
 const tabs = [
   { id: "home", label: "Home", icon: Home, path: "/" },
-  { id: "explore", label: "Explore", icon: Search, path: "/explore" },
+  { id: "bulletin", label: "Billboard", icon: PinIcon, path: "/bulletin" },
   { id: "swipe", label: "Swipe", icon: Zap, path: "/swipe" },
   { id: "messages", label: "Nachrichten", icon: MessageCircle, path: "/messages" },
   { id: "faves", label: "Favoriten", icon: Heart, path: "/faves" },

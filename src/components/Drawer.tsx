@@ -1,8 +1,9 @@
 import { cn } from "@/lib/utils";
-import { CheckSquare, Clock, Heart, Home, MessageCircle, Search, User, X, Zap, PinIcon } from "lucide-react";
+import { CheckSquare, Clock, Heart, Home, MessageCircle, User, X, Zap, PinIcon, LogOut } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useMessagesStore } from "@/features/messages/store";
+import { useAuthStore } from "@/features/auth/store";
 import NotificationBadge from "./NotificationBadge";
 
 interface DrawerProps {
@@ -12,11 +13,10 @@ interface DrawerProps {
 
 const menuItems = [
   { id: "home", label: "Home", icon: Home, path: "/" },
-  { id: "explore", label: "Explore", icon: Search, path: "/explore" },
+  { id: "bulletin", label: "Billboard", icon: PinIcon, path: "/bulletin" },
   { id: "swipe", label: "Swipe Mode", icon: Zap, path: "/swipe" },
   { id: "messages", label: "Nachrichten", icon: MessageCircle, path: "/messages" },
   { id: "checklist", label: "Checkliste", icon: CheckSquare, path: "/checklist" },
-  { id: "bulletin", label: "Bulletin Board", icon: PinIcon, path: "/bulletin" },
   { id: "faves", label: "Favoriten", icon: Heart, path: "/faves" },
   { id: "account", label: "Account", icon: User, path: "/account" },
   { id: "history", label: "Verlauf", icon: Clock, path: "/history" },
@@ -25,6 +25,7 @@ const menuItems = [
 export default function Drawer({ isOpen, onClose }: DrawerProps) {
   const location = useLocation();
   const { unreadCount, fetchUnreadCount } = useMessagesStore();
+  const { user, logout } = useAuthStore();
 
   useEffect(() => {
     if (isOpen) {
@@ -39,6 +40,11 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
       document.body.style.overflow = "unset";
     };
   }, [isOpen, fetchUnreadCount]);
+
+  const handleLogout = async () => {
+    await logout();
+    onClose();
+  };
 
   if (!isOpen) return null;
 
@@ -69,6 +75,33 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
           </button>
         </div>
 
+        {/* User Info */}
+        {user && (
+          <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <div className="flex items-center space-x-3">
+              {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.name || user.email}
+                  className="w-10 h-10 rounded-full"
+                />
+              ) : (
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <User size={20} className="text-blue-600" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user.name || user.email}
+                </p>
+                <p className="text-xs text-gray-500 capitalize">
+                  {user.package} Plan
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <nav className="py-4">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -98,6 +131,17 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
             );
           })}
         </nav>
+
+        {/* Logout Button */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gray-50">
+          <button
+            onClick={handleLogout}
+            className="flex items-center w-full px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 transition-colors rounded-lg"
+          >
+            <LogOut size={20} className="mr-4" />
+            Sign Out
+          </button>
+        </div>
       </div>
     </div>
   );

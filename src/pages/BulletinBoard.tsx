@@ -1,229 +1,255 @@
-import { useState } from "react";
-import { Camera, Plus, Upload, X } from "lucide-react";
-import { BulletinListing, BulletinFormData } from "@/features/bulletin/types";
+import { useState, useEffect } from "react";
+import { Camera, Plus, User, Heart, MessageCircle, Edit, MoreHorizontal, MapPin, Calendar, Bookmark, Loader } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { BulletinListing } from "@/features/bulletin/types";
+import { billboardApi } from "@/features/billboard/api";
+import { useAuthStore } from "@/features/auth/store";
 
 export default function BulletinBoard() {
-  const [isCreating, setIsCreating] = useState(false);
   const [listings, setListings] = useState<BulletinListing[]>([]);
-  const [newListing, setNewListing] = useState<Partial<BulletinFormData>>({
-    title: "",
-    description: "",
-    availableFrom: "",
-    images: [] as string[]
-  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
+  
+  const { user, isAuthenticated } = useAuthStore();
+  const location = useLocation();
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          if (e.target?.result) {
-            setNewListing(prev => ({
-              ...prev,
-              images: [...prev.images, e.target!.result as string]
-            }));
-          }
-        };
-        reader.readAsDataURL(file);
-      });
+  // Load success message from navigation state
+  useEffect(() => {
+    if (location.state?.message) {
+      setMessage(location.state.message);
+      // Clear the message after 3 seconds
+      setTimeout(() => setMessage(''), 3000);
+    }
+  }, [location.state]);
+
+  // Load all billboard listings
+  useEffect(() => {
+    const loadListings = async () => {
+      try {
+        const response = await billboardApi.getAllListings({
+          sort: 'newest',
+          limit: 50
+        });
+        setListings(response.listings);
+      } catch (err) {
+        setError('Failed to load listings');
+        console.error('Load error:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadListings();
+  }, []);
+
+  const handleLike = async (listingId: string) => {
+    if (!isAuthenticated) {
+      alert('Login to like posts');
+      return;
+    }
+
+    try {
+      const result = await billboardApi.toggleLike(listingId, user!.id);
+      // Update local state
+      setListings(prev => prev.map(listing => 
+        listing.id === listingId 
+          ? { ...listing, interested_count: result.likeCount }
+          : listing
+      ));
+    } catch (err) {
+      console.error('Like error:', err);
     }
   };
 
-  const removeImage = (index: number) => {
-    setNewListing(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index)
-    }));
+  const handleComment = (_listingId: string) => {
+    if (!isAuthenticated) {
+      alert('Login to comment on posts');
+      return;
+    }
+    // Navigate to comments or open comment modal
+    // TODO: Implement commenting system
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const listing: BulletinListing = {
-      id: Date.now().toString(),
-      title: newListing.title || "",
-      description: newListing.description || "",
-      availableFrom: newListing.availableFrom || "",
-      images: (newListing.images as string[]) || [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      isActive: true,
-      views: 0,
-      interested_count: 0,
-      ...newListing
-    };
-    setListings(prev => [listing, ...prev]);
-    setNewListing({ title: "", description: "", availableFrom: "", images: [] });
-    setIsCreating(false);
+  const incrementViews = async (listingId: string) => {
+    try {
+      await billboardApi.incrementViews(listingId);
+    } catch (err) {
+      console.error('View increment error:', err);
+    }
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-6">
+    <div className="max-w-lg mx-auto bg-white min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Bulletin Board</h1>
-          <p className="text-gray-600">Share your listings like a digital bulletin board</p>
+      <div className="sticky top-0 bg-white border-b border-gray-200 z-10">
+        <div className="flex items-center justify-between p-4">
+          <h1 className="text-xl font-semibold text-gray-900">Billboard</h1>
+          <Link
+            to="/billboard/upload"
+            className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
+          >
+            <Plus size={20} />
+          </Link>
         </div>
-        <button
-          onClick={() => setIsCreating(true)}
-          className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus size={20} />
-          <span>New Listing</span>
-        </button>
       </div>
 
-      {/* Create Form */}
-      {isCreating && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Create New Listing</h2>
-            <button
-              onClick={() => setIsCreating(false)}
-              className="p-1 hover:bg-gray-100 rounded"
-            >
-              <X size={20} />
-            </button>
+      {/* Success Message */}
+      {message && (
+        <div className="mx-4 mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
+          <p className="text-green-700 text-sm">{message}</p>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <div className="mx-4 mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-700 text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-16">
+          <div className="flex items-center space-x-3">
+            <Loader className="animate-spin" size={24} />
+            <span className="text-gray-600">Loading listings...</span>
           </div>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title *
-              </label>
-              <input
-                type="text"
-                value={newListing.title}
-                onChange={(e) => setNewListing(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., Beautiful 2-room apartment in Mitte"
-                required
-              />
-            </div>
+        </div>
+      )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description *
-              </label>
-              <textarea
-                value={newListing.description}
-                onChange={(e) => setNewListing(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                rows={4}
-                placeholder="Describe your listing..."
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Available From *
-              </label>
-              <input
-                type="date"
-                value={newListing.availableFrom}
-                onChange={(e) => setNewListing(prev => ({ ...prev, availableFrom: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-
-            {/* Image Upload */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Photos
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  id="image-upload"
-                />
-                <label
-                  htmlFor="image-upload"
-                  className="flex flex-col items-center justify-center cursor-pointer"
-                >
-                  <Upload size={32} className="text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-600">Click to upload images</p>
-                  <p className="text-xs text-gray-400">PNG, JPG up to 10MB each</p>
-                </label>
-              </div>
-
-              {/* Image Preview */}
-              {newListing.images.length > 0 && (
-                <div className="grid grid-cols-3 gap-4 mt-4">
-                  {newListing.images.map((image, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={image}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg"
-                      />
-                      <button
-                        onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
-                      >
-                        <X size={12} />
-                      </button>
+      {/* Posts Feed */}
+      <div className="pb-16">
+        {!isLoading && listings.length === 0 ? (
+          <div className="text-center py-16 px-4">
+            <Camera size={64} className="text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
+            <p className="text-gray-600 mb-4">Be the first to share a property photo on the billboard</p>
+            <Link
+              to="/billboard/upload"
+              className="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition-colors inline-block"
+            >
+              📷 Upload First Photo
+            </Link>
+            <p className="text-xs text-gray-500 mt-2">
+              Our AI will automatically analyze your image
+            </p>
+          </div>
+        ) : (
+          listings.map((listing) => (
+            <article 
+              key={listing.id} 
+              className="border-b border-gray-100 pb-4 mb-4"
+              onClick={() => incrementViews(listing.id)}
+            >
+              {/* Post Header */}
+              <div className="flex items-center justify-between p-4 pb-3">
+                <div className="flex items-center space-x-3">
+                  {listing.userAvatar ? (
+                    <img
+                      src={listing.userAvatar}
+                      alt={listing.userName}
+                      className="w-8 h-8 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                      <User size={16} className="text-gray-500" />
                     </div>
-                  ))}
+                  )}
+                  <div>
+                    <p className="font-semibold text-sm">{listing.userName || 'Anonymous'}</p>
+                    {listing.location && (
+                      <p className="text-gray-500 text-xs flex items-center">
+                        <MapPin size={12} className="mr-1" />
+                        {listing.location}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
-
-            <div className="flex space-x-3 pt-4">
-              <button
-                type="submit"
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Create Listing
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsCreating(false)}
-                className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Listings Grid */}
-      {listings.length === 0 ? (
-        <div className="text-center py-12">
-          <Camera size={48} className="text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No listings yet</h3>
-          <p className="text-gray-600">Create your first bulletin board listing to get started</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {listings.map((listing) => (
-            <div key={listing.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              {listing.images.length > 0 && (
-                <img
-                  src={listing.images[0]}
-                  alt={listing.title}
-                  className="w-full h-48 object-cover"
-                />
-              )}
-              <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">{listing.title}</h3>
-                <p className="text-gray-600 text-sm mb-3 line-clamp-3">{listing.description}</p>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span>Available: {new Date(listing.availableFrom).toLocaleDateString()}</span>
-                  <span>{listing.images.length} photos</span>
+                <div className="flex items-center space-x-2">
+                  {isAuthenticated && listing.userId === user?.id && (
+                    <Link
+                      to={`/billboard/edit/${listing.id}`}
+                      className="p-1 hover:bg-gray-100 rounded"
+                    >
+                      <Edit size={16} className="text-gray-600" />
+                    </Link>
+                  )}
+                  <button className="p-1 hover:bg-gray-100 rounded">
+                    <MoreHorizontal size={16} className="text-gray-600" />
+                  </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+
+              {/* Post Image */}
+              {listing.images[0] && (
+                <div className="w-full">
+                  <img
+                    src={listing.images[0]}
+                    alt={listing.title}
+                    className="w-full max-h-96 object-cover"
+                  />
+                </div>
+              )}
+
+              {/* Post Actions */}
+              <div className="flex items-center justify-between p-4 pt-3">
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLike(listing.id);
+                    }}
+                    className="hover:text-red-500 transition-colors"
+                  >
+                    <Heart size={24} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleComment(listing.id);
+                    }}
+                    className="hover:text-gray-600 transition-colors"
+                  >
+                    <MessageCircle size={24} />
+                  </button>
+                </div>
+                <button className="hover:text-gray-600 transition-colors">
+                  <Bookmark size={24} />
+                </button>
+              </div>
+
+              {/* Post Content */}
+              <div className="px-4">
+                <p className="font-semibold text-sm mb-1">{listing.title}</p>
+                {listing.description && (
+                  <p className="text-sm text-gray-700 mb-2">{listing.description}</p>
+                )}
+                
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                  {listing.price && listing.price > 0 && (
+                    <span className="font-semibold text-green-600">€{listing.price}</span>
+                  )}
+                  {listing.availableFrom && (
+                    <div className="flex items-center">
+                      <Calendar size={12} className="mr-1" />
+                      Available: {new Date(listing.availableFrom).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex items-center justify-between text-xs text-gray-400">
+                  <span>{new Date(listing.createdAt).toLocaleDateString()}</span>
+                  <div className="flex items-center space-x-4">
+                    <span>{listing.views} views</span>
+                    <span>{listing.interested_count} likes</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
     </div>
   );
 }

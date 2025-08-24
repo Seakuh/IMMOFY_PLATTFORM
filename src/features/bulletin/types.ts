@@ -3,7 +3,7 @@ export interface BulletinListing {
   title: string;
   description: string;
   availableFrom: string;
-  images: string[];
+  images: string[]; // Usually just one image, but keeping as array for flexibility
   createdAt: string;
   updatedAt: string;
   
@@ -42,7 +42,7 @@ export interface BulletinFormData {
   title: string;
   description: string;
   availableFrom: string;
-  images: File[] | string[];
+  images: File[] | string[]; // Single image but kept as array for API compatibility
   price?: number;
   location?: string;
   rooms?: number;

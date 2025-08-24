@@ -1,9 +1,8 @@
-import { Camera, Euro, Home, MapPin, Plus, X, Loader, AlertCircle, Check, Upload, ArrowLeft, ArrowRight } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
-import { uploadPropertyImages } from "../features/properties/api";
+import { logButtonClicked } from "@/lib/logger";
+import { AlertCircle, ArrowLeft, ArrowRight, Camera, Check, Euro, Home, Loader, MapPin, Plus, Upload, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useCreateProperty } from "../features/properties/hooks";
 import { PropertyFormData } from "../features/properties/types";
-import { logButtonClicked } from "@/lib/logger";
 
 interface CreatePropertyDialogProps {
   isOpen: boolean;
@@ -33,14 +32,14 @@ export default function CreatePropertyDialog({
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [newFeature, setNewFeature] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  // const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const steps: Step[] = ["basic", "details", "features", "images"];
   const currentStepIndex = steps.indexOf(currentStep);
   const progress = ((currentStepIndex + 1) / steps.length) * 100;
 
-  const { createWithImages, loading, error, success, reset, isLoading, isError, isSuccess } = useCreateProperty();
+  const { createWithImages, error, reset, isLoading, isError, isSuccess } = useCreateProperty();
 
   // Auto-close nach erfolgreichem Submit
   useEffect(() => {
@@ -203,41 +202,6 @@ export default function CreatePropertyDialog({
       default:
         return false;
     }
-  };
-
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-    const files = Array.from(e.dataTransfer.files);
-    processFiles(files);
-  };
-
-  const removeImage = (index: number) => {
-    URL.revokeObjectURL(previewUrls[index]);
-    setFormData((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
-    setImages(prev => prev.filter((_, i) => i !== index));
-    setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
   const renderStepContent = () => {

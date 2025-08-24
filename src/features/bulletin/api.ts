@@ -1,6 +1,6 @@
 import { BulletinListing, BulletinFormData, BulletinFilters, BulletinResponse } from './types';
 
-const API_BASE = '/api/bulletin';
+const API_BASE = '/bulletin';
 
 export const bulletinApi = {
   // Get all bulletin listings with optional filters
@@ -36,7 +36,7 @@ export const bulletinApi = {
     
     // Handle images
     if (data.images) {
-      data.images.forEach((image, index) => {
+      data.images.forEach((image) => {
         if (image instanceof File) {
           formData.append(`images`, image);
         }
