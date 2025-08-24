@@ -8,6 +8,8 @@ import History from './pages/History'
 import SeekerDetail from './pages/SeekerDetail'
 import SwipeMode from './pages/SwipeMode'
 import Messages from './pages/Messages'
+import Checklist from './pages/Checklist/Checklist'
+import BulletinBoard from './pages/BulletinBoard'
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
         <Route path="/explore" element={<Explore />} />
         <Route path="/swipe" element={<SwipeMode />} />
         <Route path="/messages" element={<Messages />} />
+        <Route path="/checklist" element={<Checklist />} />
+        <Route path="/bulletin" element={<BulletinBoard />} />
         <Route path="/faves" element={<Faves />} />
         <Route path="/account" element={<Account />} />
         <Route path="/history" element={<History />} />

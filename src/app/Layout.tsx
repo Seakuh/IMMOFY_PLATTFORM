@@ -1,5 +1,6 @@
 import CreatePropertyOnboarding from "@/components/CreatePropertyOnboarding";
 import Drawer from "@/components/Drawer";
+import Footer from "@/components/Footer";
 import NavTabs from "@/components/NavTabs";
 import NavTop from "@/components/NavTop";
 import { logButtonClicked } from "@/lib/logger";
@@ -37,10 +38,10 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <NavTop onMenuToggle={() => setIsDrawerOpen(true)} />
 
-      <main className="pt-16 pb-20 px-4">
+      <main className="pt-16 pb-20 px-4 flex-grow">
         <div className="max-w-6xl mx-auto">{children}</div>
       </main>
 
@@ -56,6 +57,7 @@ export default function Layout({ children }: LayoutProps) {
         <Search className="w-6 h-6" />
       </button>
 
+      <Footer />
       <NavTabs />
       <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
       <CreatePropertyOnboarding

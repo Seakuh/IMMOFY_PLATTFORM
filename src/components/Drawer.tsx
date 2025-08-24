@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Clock, Heart, Home, MessageCircle, Search, User, X, Zap } from "lucide-react";
+import { CheckSquare, Clock, Heart, Home, MessageCircle, Search, User, X, Zap, PinIcon } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useMessagesStore } from "@/features/messages/store";
@@ -15,6 +15,8 @@ const menuItems = [
   { id: "explore", label: "Explore", icon: Search, path: "/explore" },
   { id: "swipe", label: "Swipe Mode", icon: Zap, path: "/swipe" },
   { id: "messages", label: "Nachrichten", icon: MessageCircle, path: "/messages" },
+  { id: "checklist", label: "Checkliste", icon: CheckSquare, path: "/checklist" },
+  { id: "bulletin", label: "Bulletin Board", icon: PinIcon, path: "/bulletin" },
   { id: "faves", label: "Favoriten", icon: Heart, path: "/faves" },
   { id: "account", label: "Account", icon: User, path: "/account" },
   { id: "history", label: "Verlauf", icon: Clock, path: "/history" },
