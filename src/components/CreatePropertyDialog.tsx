@@ -1,5 +1,5 @@
 import { logButtonClicked } from "@/lib/logger";
-import { AlertCircle, ArrowLeft, ArrowRight, Camera, Check, Euro, Home, Loader, MapPin, Plus, Upload, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Camera, Check, Euro, Home, Loader, MapPin, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useCreateProperty } from "../features/properties/hooks";
 import { PropertyFormData } from "../features/properties/types";
@@ -39,7 +39,7 @@ export default function CreatePropertyDialog({
   const currentStepIndex = steps.indexOf(currentStep);
   const progress = ((currentStepIndex + 1) / steps.length) * 100;
 
-  const { createWithImages, error, reset, isLoading, isError, isSuccess } = useCreateProperty();
+  const { createWithImages, reset, isLoading, isError, isSuccess } = useCreateProperty();
 
   // Auto-close nach erfolgreichem Submit
   useEffect(() => {
@@ -137,7 +137,6 @@ export default function CreatePropertyDialog({
     e.preventDefault();
     
     logButtonClicked('create_property_submit', 'property_dialog');
-    setSubmitStatus('submitting');
 
     try {
       console.log('🏠 Erstelle Inserat mit Daten:', {
@@ -149,7 +148,6 @@ export default function CreatePropertyDialog({
       const property = await createWithImages(formData, images);
 
       if (property) {
-        setSubmitStatus('success');
         console.log('✅ Inserat erfolgreich erstellt:', property);
         onSuccess?.(property);
         
@@ -158,7 +156,6 @@ export default function CreatePropertyDialog({
         throw new Error('Inserat konnte nicht erstellt werden');
       }
     } catch (err) {
-      setSubmitStatus('error');
       console.error("❌ Fehler beim Erstellen des Inserats:", err);
     }
   };
@@ -178,7 +175,6 @@ export default function CreatePropertyDialog({
     previewUrls.forEach((url) => URL.revokeObjectURL(url));
     setPreviewUrls([]);
     setNewFeature("");
-    setSubmitStatus('idle');
     reset(); // Reset hook state
   };
 
@@ -503,280 +499,6 @@ export default function CreatePropertyDialog({
         <div className="flex flex-col h-[calc(90vh-80px)]">
           <div className="flex-1 overflow-y-auto p-6">
             {renderStepContent()}
-          </div>
-            {/* Title */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Titel
-              </label>
-              <div className="relative">
-                <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, title: e.target.value }))
-                  }
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="z.B. Moderne 3-Zimmer-Wohnung"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Price & Rooms */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Preis (€)
-                </label>
-                <div className="relative">
-                  <Euro className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="number"
-                    value={formData.price || ""}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        price: Number(e.target.value),
-                      }))
-                    }
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    placeholder="1200"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Zimmer
-                </label>
-                <select
-                  value={formData.rooms}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      rooms: Number(e.target.value),
-                    }))
-                  }
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                >
-                  {[1, 2, 3, 4, 5, 6].map((num) => (
-                    <option key={num} value={num}>
-                      {num} Zimmer
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Location & Size */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Standort
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    value={formData.location}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        location: e.target.value,
-                      }))
-                    }
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    placeholder="Berlin, Mitte"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Größe (m²)
-                </label>
-                <input
-                  type="number"
-                  value={formData.size || ""}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      size: Number(e.target.value),
-                    }))
-                  }
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="85"
-                />
-              </div>
-            </div>
-
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Beschreibung
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                placeholder="Beschreiben Sie Ihre Immobilie..."
-              />
-            </div>
-
-            {/* Images */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Bilder
-              </label>
-              <div className="space-y-4">
-                {/* Drag & Drop Upload Area */}
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  onDragEnter={handleDragEnter}
-                  onDragLeave={handleDragLeave}
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                  className={`w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer group ${
-                    isDragOver
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                  }`}
-                >
-                  {isDragOver ? (
-                    <>
-                      <Upload className="w-8 h-8 text-blue-500 mb-2 animate-bounce" />
-                      <span className="text-sm text-blue-600 font-medium">
-                        Bilder hier ablegen
-                      </span>
-                      <span className="text-xs text-blue-400 mt-1">Loslassen zum Hochladen</span>
-                    </>
-                  ) : (
-                    <>
-                      <Camera className="w-8 h-8 text-gray-400 group-hover:text-gray-600 mb-2 transition-colors" />
-                      <span className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">
-                        Bilder auswählen oder hierher ziehen
-                      </span>
-                    </>
-                  )}
-                </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-
-                {previewUrls.length > 0 && (
-                  <div className="grid grid-cols-3 gap-3">
-                    {previewUrls.map((url, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={url}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-20 object-cover rounded-lg"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Features */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ausstattung
-              </label>
-              <div className="space-y-3">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newFeature}
-                    onChange={(e) => setNewFeature(e.target.value)}
-                    onKeyPress={(e) =>
-                      e.key === "Enter" && (e.preventDefault(), addFeature())
-                    }
-                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    placeholder="Ausstattung hinzufügen"
-                  />
-                  <button
-                    type="button"
-                    onClick={addFeature}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {formData.features.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {formData.features.map((feature, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                      >
-                        {feature}
-                        <button
-                          type="button"
-                          onClick={() => removeFeature(feature)}
-                          className="w-4 h-4 hover:bg-blue-200 rounded-full flex items-center justify-center"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Status Messages */}
-            {isError && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                <div className="flex items-start space-x-3">
-                  <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-red-800 font-medium text-sm">Fehler beim Erstellen des Inserats</p>
-                    <p className="text-red-600 text-sm mt-1">{error}</p>
-                    <button
-                      onClick={() => reset()}
-                      className="text-red-600 hover:text-red-700 text-sm underline mt-2"
-                    >
-                      Erneut versuchen
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {isSuccess && (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                <div className="flex items-center space-x-3">
-                  <Check className="w-5 h-5 text-green-500" />
-                  <div>
-                    <p className="text-green-800 font-medium text-sm">Inserat erfolgreich erstellt!</p>
-                    <p className="text-green-600 text-sm mt-1">Das Fenster schließt sich automatisch...</p>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Footer */}

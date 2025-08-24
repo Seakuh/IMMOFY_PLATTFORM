@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Camera, Upload, X, ArrowLeft, Loader } from "lucide-react";
 import { billboardApi, AIAnalysisResponse } from "@/features/billboard/api";
-import { BulletinFormData } from "@/features/billboard/types";
+import { BulletinFormData } from "@/features/bulletin/types";
 import { useAuthStore } from "@/features/auth/store";
 
 export default function BillboardUpload() {
@@ -73,7 +73,7 @@ export default function BillboardUpload() {
 
     setIsUploading(true);
     try {
-      const listing = await billboardApi.createListing({
+      const _listing = await billboardApi.createListing({
         imageFile,
         aiAnalysis,
         userOverrides,
@@ -216,7 +216,7 @@ export default function BillboardUpload() {
                     type="text"
                     placeholder={aiAnalysis.title}
                     value={userOverrides.title || ''}
-                    onChange={(e) => setUserOverrides(prev => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) => setUserOverrides((prev: Partial<BulletinFormData>) => ({ ...prev, title: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -228,7 +228,7 @@ export default function BillboardUpload() {
                   <textarea
                     placeholder={aiAnalysis.description}
                     value={userOverrides.description || ''}
-                    onChange={(e) => setUserOverrides(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) => setUserOverrides((prev: Partial<BulletinFormData>) => ({ ...prev, description: e.target.value }))}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -243,7 +243,7 @@ export default function BillboardUpload() {
                       type="text"
                       placeholder={aiAnalysis.location || 'Location'}
                       value={userOverrides.location || ''}
-                      onChange={(e) => setUserOverrides(prev => ({ ...prev, location: e.target.value }))}
+                      onChange={(e) => setUserOverrides((prev: Partial<BulletinFormData>) => ({ ...prev, location: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
@@ -256,7 +256,7 @@ export default function BillboardUpload() {
                       type="number"
                       placeholder={aiAnalysis.estimatedPrice?.toString() || 'Price'}
                       value={userOverrides.price || ''}
-                      onChange={(e) => setUserOverrides(prev => ({ ...prev, price: Number(e.target.value) }))}
+                      onChange={(e) => setUserOverrides((prev: Partial<BulletinFormData>) => ({ ...prev, price: Number(e.target.value) }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
@@ -269,7 +269,7 @@ export default function BillboardUpload() {
                   <input
                     type="date"
                     value={userOverrides.availableFrom || ''}
-                    onChange={(e) => setUserOverrides(prev => ({ ...prev, availableFrom: e.target.value }))}
+                    onChange={(e) => setUserOverrides((prev: Partial<BulletinFormData>) => ({ ...prev, availableFrom: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>

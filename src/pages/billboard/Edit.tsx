@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Camera, Upload, X, ArrowLeft, Loader, Trash2 } from "lucide-react";
+import { Camera, ArrowLeft, Loader, Trash2 } from "lucide-react";
 import { billboardApi } from "@/features/billboard/api";
-import { BulletinListing, BulletinFormData } from "@/features/billboard/types";
+import { BulletinListing, BulletinFormData } from "@/features/bulletin/types";
 import { useAuthStore } from "@/features/auth/store";
 
 export default function BillboardEdit() {
@@ -243,7 +243,7 @@ export default function BillboardEdit() {
             <input
               type="text"
               value={formData.title || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              onChange={(e) => setFormData((prev: BulletinFormData) => ({ ...prev, title: e.target.value }))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -254,7 +254,7 @@ export default function BillboardEdit() {
             </label>
             <textarea
               value={formData.description || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setFormData((prev: BulletinFormData) => ({ ...prev, description: e.target.value }))}
               rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
             />
@@ -268,7 +268,7 @@ export default function BillboardEdit() {
               <input
                 type="text"
                 value={formData.location || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                onChange={(e) => setFormData((prev: BulletinFormData) => ({ ...prev, location: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -280,7 +280,7 @@ export default function BillboardEdit() {
               <input
                 type="number"
                 value={formData.price || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, price: Number(e.target.value) }))}
+                onChange={(e) => setFormData((prev: BulletinFormData) => ({ ...prev, price: Number(e.target.value) }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -293,7 +293,7 @@ export default function BillboardEdit() {
             <input
               type="date"
               value={formData.availableFrom || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, availableFrom: e.target.value }))}
+              onChange={(e) => setFormData((prev: BulletinFormData) => ({ ...prev, availableFrom: e.target.value }))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
