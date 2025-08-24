@@ -55,7 +55,6 @@ export default function CreatePropertyOnboarding({
   // Onboarding Submission Hook
   const {
     submitOnboarding,
-    status,
     result,
     error,
     isSubmitting,

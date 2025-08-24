@@ -36,7 +36,7 @@ export async function submitOnboardingData(
 
   // Bilder hinzufügen (falls vorhanden)
   if (data.images && data.images.length > 0) {
-    data.images.forEach((file, index) => {
+    data.images.forEach((file) => {
       formData.append(`images`, file); // Backend erwartet Array
     });
   }

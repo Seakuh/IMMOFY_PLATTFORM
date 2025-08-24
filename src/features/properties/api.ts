@@ -64,7 +64,7 @@ export async function createPropertyWithImages(
   formData.append('propertyData', JSON.stringify(propertyData))
   
   // Bilder hinzufügen
-  images.forEach((file, index) => {
+  images.forEach((file) => {
     formData.append('images', file)
   })
   
