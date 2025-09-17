@@ -1,18 +1,41 @@
 import { useState, useEffect } from "react";
-import { Camera, Plus, User, Heart, MessageCircle, Edit, MoreHorizontal, MapPin, Calendar, Bookmark, Loader } from "lucide-react";
+import { Camera, Plus, User, Heart, MessageCircle, Edit, MoreHorizontal, MapPin, Calendar, Bookmark, Loader, Send } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { BulletinListing } from "@/features/bulletin/types";
 import { billboardApi } from "@/features/billboard/api";
 import { useAuthStore } from "@/features/auth/store";
+import { useUserNotifications, useBillboardCreatorNotifications, useNotificationPermission } from "@/hooks/useWebSocket";
+import ImageCarousel from "@/components/ImageCarousel";
 
 export default function BulletinBoard() {
   const [listings, setListings] = useState<BulletinListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [message, setMessage] = useState<string>("");
+  const [applications, setApplications] = useState<Set<string>>(new Set());
+  const [applicationCounts, setApplicationCounts] = useState<Map<string, number>>(new Map());
   
   const { user, isAuthenticated } = useAuthStore();
   const location = useLocation();
+
+  // Initialize WebSocket notifications
+  useUserNotifications();
+  useNotificationPermission();
+
+  // Handle new applications for billboard creators
+  useBillboardCreatorNotifications(
+    (data) => {
+      // Update application count for the specific billboard
+      setApplicationCounts(prev => new Map([...prev, [data.billboardId, (prev.get(data.billboardId) || 0) + 1]]));
+
+      // Show success message
+      setMessage(`New application from ${data.applicantName}!`);
+      setTimeout(() => setMessage(''), 5000);
+    },
+    (data) => {
+      console.log('Application status updated:', data);
+    }
+  );
 
   // Load success message from navigation state
   useEffect(() => {
@@ -69,6 +92,32 @@ export default function BulletinBoard() {
     }
     // Navigate to comments or open comment modal
     // TODO: Implement commenting system
+  };
+
+  const handleApply = async (listingId: string) => {
+    if (!isAuthenticated) {
+      alert('Login required to apply');
+      return;
+    }
+
+    if (applications.has(listingId)) {
+      alert('You have already applied to this listing');
+      return;
+    }
+
+    try {
+      await billboardApi.applyToListing(listingId, user!.id);
+
+      // Update local state optimistically
+      setApplications(prev => new Set([...prev, listingId]));
+      setApplicationCounts(prev => new Map([...prev, [listingId, (prev.get(listingId) || 0) + 1]]));
+
+      alert('Application submitted successfully! The listing creator will be notified.');
+    } catch (err) {
+      console.error('Application error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to submit application';
+      alert(errorMessage);
+    }
   };
 
   const incrementViews = async (listingId: string) => {
@@ -181,15 +230,12 @@ export default function BulletinBoard() {
                 </div>
               </div>
 
-              {/* Post Image */}
-              {listing.images[0] && (
-                <div className="w-full">
-                  <img
-                    src={listing.images[0]}
-                    alt={listing.title}
-                    className="w-full max-h-96 object-cover"
-                  />
-                </div>
+              {/* Post Images */}
+              {listing.images && listing.images.length > 0 && (
+                <ImageCarousel
+                  images={listing.images}
+                  title={listing.title}
+                />
               )}
 
               {/* Post Actions */}
@@ -213,6 +259,24 @@ export default function BulletinBoard() {
                   >
                     <MessageCircle size={24} />
                   </button>
+                  {/* Application Button - Only show if user is not the creator */}
+                  {isAuthenticated && listing.userId !== user?.id && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleApply(listing.id);
+                      }}
+                      disabled={applications.has(listing.id)}
+                      className={`flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                        applications.has(listing.id)
+                          ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                          : 'bg-blue-500 text-white hover:bg-blue-600'
+                      }`}
+                    >
+                      <Send size={16} />
+                      <span>{applications.has(listing.id) ? 'Applied' : 'Apply'}</span>
+                    </button>
+                  )}
                 </div>
                 <button className="hover:text-gray-600 transition-colors">
                   <Bookmark size={24} />
@@ -225,7 +289,34 @@ export default function BulletinBoard() {
                 {listing.description && (
                   <p className="text-sm text-gray-700 mb-2">{listing.description}</p>
                 )}
-                
+
+                {/* Display user content and hashtags */}
+                {listing.content && (
+                  <p className="text-sm text-gray-700 mb-2">{listing.content}</p>
+                )}
+                {listing.hashtags && listing.hashtags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {listing.hashtags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Show deadline if exists */}
+                {listing.deadline && (
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-2 mb-2">
+                    <p className="text-xs text-orange-700 font-medium flex items-center">
+                      <Calendar size={12} className="mr-1" />
+                      Applications close: {new Date(listing.deadline).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
                   {listing.price && listing.price > 0 && (
                     <span className="font-semibold text-green-600">€{listing.price}</span>
@@ -243,8 +334,54 @@ export default function BulletinBoard() {
                   <div className="flex items-center space-x-4">
                     <span>{listing.views} views</span>
                     <span>{listing.interested_count} likes</span>
+                    <span>{applicationCounts.get(listing.id) || 0} applications</span>
                   </div>
                 </div>
+
+                {/* Show applicant avatars if user is the creator */}
+                {isAuthenticated && listing.userId === user?.id && applicationCounts.get(listing.id) && (
+                  <div className="mt-3 pt-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">Recent applicants:</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex -space-x-2">
+                          {/* Mock applicant avatars - replace with real data */}
+                          {Array.from({ length: Math.min(applicationCounts.get(listing.id) || 0, 3) }).map((_, index) => (
+                            <div
+                              key={index}
+                              className="w-6 h-6 bg-gray-300 rounded-full border-2 border-white flex items-center justify-center"
+                            >
+                              <User size={12} className="text-gray-600" />
+                            </div>
+                          ))}
+                          {(applicationCounts.get(listing.id) || 0) > 3 && (
+                            <div className="w-6 h-6 bg-blue-500 text-white rounded-full border-2 border-white flex items-center justify-center text-xs font-medium">
+                              +{(applicationCounts.get(listing.id) || 0) - 3}
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/billboard/${listing.id}/applications`);
+                          }}
+                          className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          View All
+                        </button>
+                      </div>
+                    </div>
+                    {/* Invitation Controls */}
+                    {(listing.maxInvitations && listing.sentInvitations !== undefined) && (
+                      <div className="mt-2 text-xs text-gray-500">
+                        Invitations: {listing.sentInvitations}/{listing.maxInvitations} sent
+                        {listing.sentInvitations >= listing.maxInvitations && (
+                          <span className="text-orange-600 ml-1">(Limit reached)</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </article>
           ))

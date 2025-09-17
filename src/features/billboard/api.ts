@@ -91,34 +91,30 @@ export const billboardApi = {
     return response.json();
   },
 
-  // Create a new billboard listing with AI analysis
+  // Create a new billboard listing
   createListing: async (data: {
-    imageFile: File;
-    aiAnalysis: AIAnalysisResponse['analysis'];
-    userOverrides?: Partial<BulletinFormData>;
+    imageFiles: File[];
+    formData: Partial<BulletinFormData>;
     userId?: string;
   }): Promise<BulletinListing> => {
-    const formData = new FormData();
-    
-    // Add the image
-    formData.append('image', data.imageFile);
-    
-    // Add AI analysis data
-    formData.append('aiData', JSON.stringify(data.aiAnalysis));
-    
-    // Add user overrides
-    if (data.userOverrides) {
-      formData.append('userOverrides', JSON.stringify(data.userOverrides));
-    }
-    
+    const formDataToSend = new FormData();
+
+    // Add the images
+    data.imageFiles.forEach((file, index) => {
+      formDataToSend.append(`images`, file);
+    });
+
+    // Add form data
+    formDataToSend.append('formData', JSON.stringify(data.formData));
+
     // Add user ID if authenticated
     if (data.userId) {
-      formData.append('userId', data.userId);
+      formDataToSend.append('userId', data.userId);
     }
 
     const response = await fetch(`${API_BASE}`, {
       method: 'POST',
-      body: formData,
+      body: formDataToSend,
     });
 
     if (!response.ok) {
@@ -334,5 +330,121 @@ export const billboardApi = {
       throw new Error('Failed to remove reaction');
     }
     return response.json();
+  },
+
+  // === APPLICATION FUNCTIONS ===
+
+  // Apply to a billboard listing
+  applyToListing: async (listingId: string, userId: string, message?: string): Promise<{ success: boolean; applicationId: string }> => {
+    const response = await fetch(`${API_BASE}/${listingId}/apply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, message }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to submit application');
+    }
+    return response.json();
+  },
+
+  // Get applications for a listing (creator only)
+  getApplications: async (listingId: string, userId: string): Promise<{ applications: any[] }> => {
+    const response = await fetch(`${API_BASE}/${listingId}/applications?userId=${userId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch applications');
+    }
+    return response.json();
+  },
+
+  // Update application status (creator only)
+  updateApplicationStatus: async (applicationId: string, status: 'accepted' | 'rejected', userId: string): Promise<void> => {
+    const response = await fetch(`${API_BASE}/applications/${applicationId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, userId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update application status');
+    }
+  },
+
+  // Get user's applications
+  getUserApplications: async (userId: string): Promise<{ applications: any[] }> => {
+    const response = await fetch(`${API_BASE}/user/${userId}/applications`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch user applications');
+    }
+    return response.json();
+  },
+
+  // Send invitation to applicant (limited)
+  sendInvitation: async (listingId: string, applicantId: string, creatorId: string): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE}/${listingId}/invite/${applicantId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ creatorId }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to send invitation');
+    }
+    return response.json();
+  },
+
+  // === MESSAGING FUNCTIONS ===
+
+  // Get user messages/conversations
+  getUserMessages: async (userId: string): Promise<{ conversations: any[] }> => {
+    const response = await fetch(`${API_BASE}/user/${userId}/messages`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch user messages');
+    }
+    return response.json();
+  },
+
+  // Send a message
+  sendMessage: async (data: {
+    recipientId: string;
+    content: string;
+    senderId: string;
+    billboardId?: string;
+    type?: 'message' | 'invitation' | 'application_update';
+  }): Promise<{ success: boolean; messageId: string }> => {
+    const response = await fetch(`${API_BASE}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send message');
+    }
+    return response.json();
+  },
+
+  // Get conversation messages
+  getConversationMessages: async (conversationId: string, page = 1, limit = 50): Promise<{ messages: any[] }> => {
+    const response = await fetch(`${API_BASE}/conversations/${conversationId}/messages?page=${page}&limit=${limit}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch conversation messages');
+    }
+    return response.json();
+  },
+
+  // Mark messages as read
+  markMessagesAsRead: async (conversationId: string, userId: string): Promise<void> => {
+    const response = await fetch(`${API_BASE}/conversations/${conversationId}/read`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to mark messages as read');
+    }
   },
 };

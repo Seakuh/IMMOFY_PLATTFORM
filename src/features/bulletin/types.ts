@@ -6,7 +6,7 @@ export interface BulletinListing {
   images: string[]; // Usually just one image, but keeping as array for flexibility
   createdAt: string;
   updatedAt: string;
-  
+
   // Additional fields for a comprehensive listing
   price?: number;
   location?: string;
@@ -25,17 +25,25 @@ export interface BulletinListing {
   requirements?: string[]; // e.g., ["non-smoker", "professional", "references"]
   energy_efficiency?: 'A+' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
   heating_type?: string; // e.g., "central", "gas", "electric"
-  
+
   // Status and engagement
   isActive: boolean;
   views: number;
   interested_count: number;
   priority?: 'low' | 'medium' | 'high';
-  
+
   // User info (if logged in)
   userId?: string;
   userName?: string;
   userAvatar?: string;
+
+  // Billboard-specific fields
+  content?: string; // User-added text with hashtags
+  hashtags?: string[]; // Extracted hashtags
+  deadline?: string; // ISO date when applications close
+  maxInvitations?: number; // Limited invitations per billboard
+  sentInvitations?: number; // Current count of sent invitations
+  applicationCount?: number;
 }
 
 export interface BulletinFormData {
@@ -61,6 +69,12 @@ export interface BulletinFormData {
   energy_efficiency?: BulletinListing['energy_efficiency'];
   heating_type?: string;
   priority?: BulletinListing['priority'];
+
+  // Billboard-specific fields
+  content?: string;
+  hashtags?: string[];
+  deadline?: string;
+  maxInvitations?: number;
 }
 
 export interface BulletinFilters {

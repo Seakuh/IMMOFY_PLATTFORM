@@ -8,12 +8,14 @@ import Faves from './pages/Faves'
 import Account from './pages/Account'
 import History from './pages/History'
 import SeekerDetail from './pages/SeekerDetail'
+import HousingRequestDetail from './pages/HousingRequestDetail'
 import SwipeMode from './pages/SwipeMode'
 import Messages from './pages/Messages'
 import Checklist from './pages/Checklist/Checklist'
 import BulletinBoard from './pages/BulletinBoard'
 import BillboardUpload from './pages/billboard/Upload'
 import BillboardEdit from './pages/billboard/Edit'
+import BillboardApplications from './pages/billboard/Applications'
 
 function App() {
   return (
@@ -41,9 +43,11 @@ function App() {
             <Route path="/bulletin" element={<BulletinBoard />} />
             <Route path="/billboard/upload" element={<BillboardUpload />} />
             <Route path="/billboard/edit/:id" element={<BillboardEdit />} />
+            <Route path="/billboard/:listingId/applications" element={<BillboardApplications />} />
             <Route path="/faves" element={<Faves />} />
             <Route path="/history" element={<History />} />
             <Route path="/seeker/:id" element={<SeekerDetail />} />
+            <Route path="/housing-request/:id" element={<HousingRequestDetail />} />
             
             {/* Protected routes - authentication required */}
             <Route path="/messages" element={
