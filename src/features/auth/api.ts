@@ -11,7 +11,7 @@ import {
   AccountInfo,
 } from './types';
 
-const API_BASE = '';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 class AuthApiError extends Error {
   constructor(message: string, public status?: number, public code?: string) {

@@ -75,7 +75,7 @@ export async function createPropertyWithImages(
     imageCount: images.length
   }))
 
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
   
   const response = await fetch(`${baseUrl}/properties/create-with-images`, {
     method: 'POST',
@@ -113,8 +113,9 @@ export async function uploadPropertyImages(
   const formData = new FormData();
   files.forEach((file) => formData.append("images", file));
 
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   const response = await fetch(
-    `${"http://localhost:3000/api"}/properties/${propertyId}/images`,
+    `${baseUrl}/api/properties/${propertyId}/images`,
     {
       method: "POST",
       body: formData,

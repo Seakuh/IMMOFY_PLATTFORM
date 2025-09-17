@@ -28,7 +28,7 @@ class WebSocketService {
   private connect() {
     try {
       // Use environment variable for WebSocket URL, fallback to default
-      const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
+      const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:3000';
 
       this.socket = io(wsUrl, {
         autoConnect: true,
