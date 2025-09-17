@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BillboardService } from './billboard.service';
+import { HousingRequestsService } from '../housing-requests/housing-requests.service';
 import { CreateBillboardDto } from './dto/create-billboard.dto';
 import { UpdateBillboardDto } from './dto/update-billboard.dto';
 import { BillboardFilterDto } from './dto/billboard-filter.dto';
@@ -34,7 +35,10 @@ import { UploadedFiles, UseInterceptors } from '@nestjs/common';
 
 @Controller('billboard')
 export class BillboardController {
-  constructor(private readonly billboardService: BillboardService) {}
+  constructor(
+    private readonly billboardService: BillboardService,
+    private readonly housingRequestsService: HousingRequestsService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -104,6 +108,31 @@ export class BillboardController {
       message: 'Similar billboards found',
       billboards,
       total: billboards.length,
+    };
+  }
+
+  @Get(':id/recommend-applicants')
+  async recommendApplicants(
+    @Param('id') billboardId: string,
+    @Query('limit') limit: string = '5',
+  ) {
+    const billboard = await this.billboardService.findOne(billboardId);
+    const queryText = [billboard.title, billboard.description, billboard.content]
+      .filter(Boolean)
+      .join('\n');
+
+    const result = await this.housingRequestsService.searchSimilarByDescription(
+      queryText,
+      undefined,
+      billboard.location || billboard.city,
+      undefined,
+      parseInt(limit, 10) || 5,
+    );
+
+    return {
+      success: true,
+      applicants: result.results,
+      total: result.results.length,
     };
   }
 

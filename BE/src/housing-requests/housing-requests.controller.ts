@@ -63,6 +63,15 @@ export class HousingRequestsController {
     return this.housingRequestsService.findSimilarWithVectors(id, limitNumber);
   }
 
+  @Get(':id/recommend-billboards')
+  async recommendBillboards(
+    @Param('id') id: string,
+    @Query('limit') limit?: string,
+  ) {
+    const limitNumber = limit ? parseInt(limit, 10) : 6;
+    return this.housingRequestsService.recommendBillboardsForRequest(id, limitNumber);
+  }
+
   @Post('search-similar')
   async searchSimilar(
     @Body() searchParams: {

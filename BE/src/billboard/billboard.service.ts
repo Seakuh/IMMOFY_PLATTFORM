@@ -877,4 +877,36 @@ export class BillboardService {
       });
     }
   }
+
+  /**
+   * Search similar billboards using a precomputed embedding vector.
+   * Falls back to simple LIKE search if Cognee is unavailable.
+   */
+  async searchSimilarBillboardsByVector(
+    queryEmbedding: number[],
+    limit: number = 10,
+    filters?: any,
+  ): Promise<Billboard[]> {
+    try {
+      const similarItems = await this.cogneeService.searchSimilarBillboards(
+        queryEmbedding,
+        limit,
+        filters,
+      );
+
+      const billboardIds = similarItems
+        .map((item) => item.metadata?.billboard_id)
+        .filter((id) => id);
+
+      if (!billboardIds.length) return [];
+
+      return this.billboardRepository.find({
+        where: { id: In(billboardIds) },
+        relations: ['user'],
+      });
+    } catch (error) {
+      console.error('Error searching by vector (billboards):', error);
+      return [];
+    }
+  }
 }

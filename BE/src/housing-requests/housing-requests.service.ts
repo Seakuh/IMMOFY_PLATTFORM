@@ -10,6 +10,9 @@ import {
 import { UpdateHousingRequestDto } from './dto/update-housing-request.dto';
 import { HousingRequest } from './entities/housing-request.entity';
 import { HousingRequestRepository } from './repositories/housing-request.repository';
+import { HousingEmbeddingService } from './services/housing-embedding.service';
+import { HousingCogneeIntegrationService } from './services/cognee-integration.service';
+import { BillboardService } from '../billboard/billboard.service';
 
 @Injectable()
 export class HousingRequestsService {
@@ -21,6 +24,10 @@ export class HousingRequestsService {
     private readonly userManagementService: UserManagementService,
     @Inject(forwardRef(() => VectorListingsService))
     private readonly vectorListingsService: VectorListingsService,
+    private readonly housingEmbeddingService: HousingEmbeddingService,
+    private readonly housingCogneeService: HousingCogneeIntegrationService,
+    @Inject(forwardRef(() => BillboardService))
+    private readonly billboardService: BillboardService,
   ) {}
 
   async create(
@@ -94,7 +101,12 @@ export class HousingRequestsService {
         userId: user.id,
       });
 
-      // 9. Send confirmation email if new user
+      // 9. Generate and store embedding in Cognee (async, non-blocking)
+      this.processCogneeEmbeddingAsync(savedRequest).catch((e) =>
+        console.error('Cognee embedding error (create):', e),
+      );
+
+      // 10. Send confirmation email if new user
       if (isNewUser && password) {
         try {
           await this.userManagementService.sendHousingRequestNotification(
@@ -126,6 +138,19 @@ export class HousingRequestsService {
     } catch (error) {
       console.error('Error creating housing request:', error);
       throw new Error(`Failed to create housing request: ${error.message}`);
+    }
+  }
+
+  /**
+   * Create Cognee embedding and store it asynchronously
+   */
+  private async processCogneeEmbeddingAsync(request: HousingRequest): Promise<void> {
+    try {
+      const embedding = await this.housingEmbeddingService.createHousingEmbedding(request);
+      await this.housingCogneeService.storeHousingEmbedding(embedding);
+    } catch (e) {
+      // Log but do not throw
+      console.error('Failed to store housing request in Cognee:', e);
     }
   }
 
@@ -415,13 +440,25 @@ export class HousingRequestsService {
           `Housing request with ID ${id} not found or has no vector`,
         );
       }
+      // Try Cognee first
+      const cogneeResults = await this.housingCogneeService.searchSimilarHousing(
+        targetRequest.vector,
+        limit + 1,
+      );
 
-      // Use vector listings service for better similarity search
-      const vectorResults =
-        await this.vectorListingsService.searchSimilarRequests(
+      let vectorResults: Array<{ id: string; similarity?: number; metadata?: any }> = [];
+      if (cogneeResults.length > 0) {
+        // Map Cognee results -> expected format using metadata.housing_id
+        vectorResults = cogneeResults
+          .map((item) => ({ id: item.metadata?.housing_id, similarity: item.metadata?.score, metadata: item.metadata }))
+          .filter((x) => !!x.id) as any;
+      } else {
+        // Fallback to Pinecone vector search
+        vectorResults = await this.vectorListingsService.searchSimilarRequests(
           targetRequest.vector,
-          limit + 1, // +1 because we'll filter out the target request
+          limit + 1,
         );
+      }
 
       // Filter out the target request and convert to housing requests
       const similarIds = vectorResults
@@ -475,12 +512,37 @@ export class HousingRequestsService {
         `Housing Request: ${description}`,
       );
 
-      // Use vector service to find similar requests
-      const vectorResults =
-        await this.vectorListingsService.searchSimilarRequests(
+      // Try Cognee first
+      let vectorResults: Array<{ id: string; similarity?: number; metadata?: any }> = [];
+      const cognee = await this.housingCogneeService.searchSimilarHousing(
+        searchVector,
+        limit * 2,
+      );
+      if (cognee.length > 0) {
+        vectorResults = cognee
+          .map((item) => ({ id: item.metadata?.housing_id, similarity: item.metadata?.score, metadata: item.metadata }))
+          .filter((x) => !!x.id) as any;
+      } else {
+        // Fallback to Pinecone vector search
+        vectorResults = await this.vectorListingsService.searchSimilarRequests(
           searchVector,
-          limit * 2, // Get more results to apply filters
+          limit * 2,
         );
+      }
+
+      // If no vector results, fallback to basic text search
+      if (!vectorResults || vectorResults.length === 0) {
+        const all = await this.housingRequestRepository.findPublished();
+        const filtered = all.filter((req) => {
+          const text = `${req.generatedDescription || ''} ${req.prompt || ''}`.toLowerCase();
+          const okDesc = text.includes(description.toLowerCase());
+          const okLoc = location
+            ? (req.filteredData?.location || '').toLowerCase().includes(location.toLowerCase())
+            : true;
+          return okDesc && okLoc;
+        });
+        return { results: filtered.slice(0, limit), searchVector };
+      }
 
       // Get housing requests from vector results
       const allResults = await Promise.all(
@@ -633,6 +695,11 @@ export class HousingRequestsService {
           email: updatedRequest.email,
           userId: updatedRequest.user?.id,
         });
+
+        // Update Cognee embedding as well (async)
+        this.processCogneeEmbeddingAsync(updatedRequest).catch((e) =>
+          console.error('Cognee embedding error (update):', e),
+        );
       }
 
       return updatedRequest;
@@ -640,5 +707,31 @@ export class HousingRequestsService {
       console.error('Error updating housing request:', error);
       throw new Error(`Failed to update housing request: ${error.message}`);
     }
+  }
+
+  /**
+   * Recommend published billboards for a given housing request (cross-type recommendation)
+   * Uses Cognee (via billboard service) with fallback to LIKE search.
+   */
+  async recommendBillboardsForRequest(
+    id: string,
+    limit: number = 6,
+  ): Promise<{ billboards: any[] }> {
+    const request = await this.housingRequestRepository.findPublishedById(id);
+    if (!request) {
+      throw new Error(`Housing request with ID ${id} not found`);
+    }
+
+    // Try vector-based search first
+    const queryVector = request.vector || (await this.chatGPTModel.generateEmbedding(
+      this.housingEmbeddingService.generateEmbeddingText(request),
+    ));
+
+    const billboards = await this.billboardService.searchSimilarBillboardsByVector(
+      queryVector,
+      limit,
+    );
+
+    return { billboards };
   }
 }

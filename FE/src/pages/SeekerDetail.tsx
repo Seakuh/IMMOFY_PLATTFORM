@@ -4,7 +4,7 @@ import HousingRequestCard from "@/components/HousingRequestCard";
 import ImageGallery from "@/components/ImageGallery";
 import { useFavoritesStore, useHistoryStore } from "@/features/favorites/store";
 import { useSeeker, useSimilarSeekers } from "@/features/seekers/hooks";
-import { useSimilarHousingRequests } from "@/features/housing-requests/hooks";
+import { useSimilarHousingRequests, useRecommendedBillboards } from "@/features/housing-requests/hooks";
 import { cn, formatBudget, formatDate } from "@/lib/utils";
 import {
   ArrowLeft,
@@ -27,6 +27,8 @@ export default function SeekerDetail() {
     useSimilarSeekers(id!);
   const { housingRequests: similarHousingRequests, loading: similarHousingLoading } =
     useSimilarHousingRequests(id!);
+  const { billboards: recommendedBillboards, loading: recommendedLoading } =
+    useRecommendedBillboards(id!, 6);
   const { addToHistory } = useHistoryStore();
   const { favorites, toggleFavorite } = useFavoritesStore();
 
@@ -241,6 +243,41 @@ export default function SeekerDetail() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {similarHousingRequests.map((housingRequest) => (
                 <HousingRequestCard key={housingRequest.id} housingRequest={housingRequest} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {recommendedBillboards.length > 0 && (
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
+            Passende Inserate
+          </h2>
+          {recommendedLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+              {recommendedBillboards.map((bb) => (
+                <div key={bb.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                  {bb.images && bb.images.length > 0 ? (
+                    <img src={bb.images[0]} alt={bb.title} className="w-full h-40 object-cover" />
+                  ) : null}
+                  <div className="p-4">
+                    <p className="font-semibold text-gray-900">{bb.title}</p>
+                    {bb.location && (
+                      <p className="text-sm text-gray-600 flex items-center mt-1">
+                        <MapPin size={14} className="mr-1" /> {bb.location}
+                      </p>
+                    )}
+                    <div className="mt-2 text-sm text-gray-700 flex items-center justify-between">
+                      {bb.price ? <span className="font-medium">€{bb.price}</span> : <span />}
+                      <Link to={`/billboard`} className="text-blue-600 hover:text-blue-700 text-sm">Ansehen</Link>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           )}

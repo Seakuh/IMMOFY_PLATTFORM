@@ -1,4 +1,4 @@
-import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { Module, MiddlewareConsumer, RequestMethod, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BillboardService } from './billboard.service';
 import { BillboardController } from './billboard.controller';
@@ -16,6 +16,7 @@ import { UsersModule } from '../users/users.module';
 import { BillboardEmbeddingService } from './services/billboard-embedding.service';
 import { CogneeIntegrationService } from './services/cognee-integration.service';
 import { ImagesModule } from '../images/images.module';
+import { HousingRequestsModule } from '../housing-requests/housing-requests.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -28,7 +29,8 @@ import { ConfigModule } from '@nestjs/config';
     ]),
     ConfigModule,
     UsersModule,
-    ImagesModule
+    ImagesModule,
+    forwardRef(() => HousingRequestsModule),
   ],
   controllers: [BillboardController],
   providers: [

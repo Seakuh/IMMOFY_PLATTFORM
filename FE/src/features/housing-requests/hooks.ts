@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { HousingRequest } from './types'
-import { getHomepageData, getHousingRequest, getSimilarHousingRequests, HomepageData } from './api'
+import { getHomepageData, getHousingRequest, getSimilarHousingRequests, HomepageData, getRecommendedBillboards } from './api'
 
 export function useHomepageData() {
   const [data, setData] = useState<HomepageData | null>(null)
@@ -84,4 +84,33 @@ export function useSimilarHousingRequests(id: string, limit: number = 5) {
   }, [id, limit])
 
   return { housingRequests, loading, error }
+}
+
+export function useRecommendedBillboards(id: string, limit: number = 6) {
+  const [billboards, setBillboards] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  useEffect(() => {
+    if (!id) return
+
+    setLoading(true)
+    setError(null)
+
+    const fetchRecs = async () => {
+      try {
+        const result = await getRecommendedBillboards(id, limit)
+        setBillboards(result.billboards || [])
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Unknown error'))
+        setBillboards([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchRecs()
+  }, [id, limit])
+
+  return { billboards, loading, error }
 }

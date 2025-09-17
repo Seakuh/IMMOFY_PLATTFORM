@@ -106,13 +106,14 @@ export default function BulletinBoard() {
     }
 
     try {
-      await billboardApi.applyToListing(listingId, user!.id);
+      const message = window.prompt('Kurze Nachricht an den Vermieter (optional):') || undefined;
+      await billboardApi.applyToListing(listingId, user!.id, message);
 
       // Update local state optimistically
       setApplications(prev => new Set([...prev, listingId]));
       setApplicationCounts(prev => new Map([...prev, [listingId, (prev.get(listingId) || 0) + 1]]));
 
-      alert('Application submitted successfully! The listing creator will be notified.');
+      alert('Bewerbung erfolgreich gesendet! Der Vermieter wurde benachrichtigt.');
     } catch (err) {
       console.error('Application error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to submit application';

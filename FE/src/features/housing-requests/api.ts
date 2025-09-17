@@ -127,6 +127,14 @@ export async function getSimilarHousingRequests(
   return apiRequest<HousingRequest[]>(`/housing-requests/${id}/similar?limit=${limit}`);
 }
 
+// Empfohlene Inserate für ein Wohnungsgesuch (semantisch, Cognee mit Fallback)
+export async function getRecommendedBillboards(
+  id: string,
+  limit: number = 6
+): Promise<{ billboards: any[] }> {
+  return apiRequest<{ billboards: any[] }>(`/housing-requests/${id}/recommend-billboards?limit=${limit}`);
+}
+
 // Kontakt zu einem Wohnungssuchenden aufnehmen (für Vermieter)
 export async function contactHousingRequest(
   requestId: string,
