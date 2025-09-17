@@ -1,0 +1,58 @@
+sudo docker compose --version
+sudo docker compose down -v  # Stop and remove containers, networks, and volumes
+sudo docker compose up -d    # Start fresh containers
+sudo docker compose logs app
+
+
+sudo docker compose down
+sudo docker compose build
+sudo docker compose up -d
+
+--- Test controller
+
+curl -X POST http://localhost:3000/chatbot/user-data \
+     -H "Content-Type: application/json" \
+     -d '{"name": "John Doe", "email": "john.doe@example.com"}'
+
+curl -X POST http://localhost:3000/chatbot/send \
+     -H "Content-Type: application/json" \
+     -d '{"prompt": "Hello", "userId": "12345", "packageType": "basic"}'
+
+
+--- Server
+
+ssh root@37.27.41.23
+
+curl -X POST http://37.27.41.23:3000/chatbot/send \
+     -H "Content-Type: application/json" \
+     -d '{"prompt": "Hello", "userId": "12345", "packageType": "basic"}'
+
+
+curl -X POST http://37.27.41.23:3000/home-finder/users/new-user-process \
+  -H "Content-Type: application/json" \
+  -d '{
+        "email": "john.doe@example.com",
+        "prompt": "securePassword123",
+        "package": "securePassword123"
+
+      }'
+
+
+curl -X POST http://localhost:3000/home-finder/users/new-user-process   -H "Content-Type: application/json"   -d '{
+        "email": "john.doe@dsgsgjdaexample.com",
+        "prompt": "Welcome to our platform",
+        "packageId": "starter-package"
+      }'
+
+
+
+--- Local
+
+curl -X POST http://localhost:3000/home-finder/users/new-user-process \
+  -H "Content-Type: application/json" \
+  -d '{
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "password": "securePassword123"
+      }'
+
