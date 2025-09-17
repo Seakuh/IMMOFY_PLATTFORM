@@ -24,7 +24,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
-    
+
     try {
       if (isAlternativeLogin) {
         await alternativeLogin({
@@ -37,6 +37,10 @@ export default function Login() {
           password: formData.password,
         });
       }
+
+      // Redirect to home after successful login
+      const from = (location.state as any)?.from?.pathname || '/';
+      navigate(from, { replace: true });
     } catch (err) {
       // Error is handled by the store
     }

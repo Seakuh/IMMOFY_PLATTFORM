@@ -31,6 +31,9 @@ export interface AlternativeLoginRequest {
 
 export interface RegisterRequest {
   email: string;
+  password: string;
+  confirmPassword: string;
+  name?: string;
   package: 'basic' | 'premium' | 'pro';
 }
 
