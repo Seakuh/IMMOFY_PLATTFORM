@@ -54,20 +54,47 @@ export class UsersController {
 
   @Post('login')
   async login(@Body() body: { email: string; password: string }) {
-    const user = await this.usersService.findUserByEmail(body.email);
-
-    if (!user) {
+    // Find user; translate NotFound into 401 for consistent UX
+    let user: any;
+    try {
+      user = await this.usersService.findUserByEmail(body.email);
+    } catch {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
 
-    const isPasswordValid = await bcrypt.compare(body.password, user.password); // Vergleich des Klartext-Passworts mit dem gehashten Passwort
-
+    const isPasswordValid = await bcrypt.compare(body.password, user.password);
     if (!isPasswordValid) {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
 
-    const token = await this.authService.login(user);
-    return { user, token };
+    const { accessToken } = await this.authService.login(user);
+
+    // Normalize response for FE expectations
+    const { password, ...safeUser } = user;
+    return {
+      token: accessToken,
+      user: {
+        id: safeUser.id,
+        email: safeUser.email,
+        name: safeUser.name,
+        headline: safeUser.headline || null,
+        bio: safeUser.bio || null,
+        avatarUrl: safeUser.avatarUrl || null,
+        budgetMin: safeUser.budgetMin || null,
+        budgetMax: safeUser.budgetMax || null,
+        locations: safeUser.locations || [],
+        moveInFrom: safeUser.moveInFrom || null,
+        roomsMin: safeUser.roomsMin || null,
+        pets: safeUser.pets || null,
+        tags: safeUser.tags || [],
+        package: safeUser.packageId || 'basic',
+        createdAt: (safeUser.createdAt?.toISOString?.() || new Date().toISOString()),
+        updatedAt: (safeUser.updatedAt?.toISOString?.() || new Date().toISOString()),
+        isVerified: true,
+        lastLoginAt: new Date().toISOString(),
+      },
+      expiresIn: 60 * 60 * 24 * 30,
+    };
   }
 
   @Patch('update-package')
@@ -87,9 +114,8 @@ export class UsersController {
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    // Remove password from response
     const { password, ...userWithoutPassword } = user;
-    return { success: true, user: userWithoutPassword };
+    return userWithoutPassword; // FE expects direct user object
   }
 
   @UseGuards(JwtAuthGuard)
